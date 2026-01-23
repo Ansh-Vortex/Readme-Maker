@@ -8,9 +8,15 @@ interface GenerateRequest {
     techStack: string[];
     section: string;
     additionalContext?: string;
+    existingContent?: string;
+    instruction?: string;
 }
 
 const SECTION_PROMPTS: Record<string, string> = {
+    refine: `Refine the following content based on the user's instruction.
+Maintain the markdown formatting.
+Return ONLY the updated content.`,
+
     full: `Generate a complete, professional README.md for this project. Include:
 - Eye-catching title with emojis
 - Clear description
@@ -59,7 +65,7 @@ Format as markdown tables and code blocks.`,
 export async function POST(request: NextRequest) {
     try {
         const body: GenerateRequest = await request.json();
-        const { projectName, projectDescription, techStack, section, additionalContext } = body;
+        const { projectName, projectDescription, techStack, section, additionalContext, existingContent, instruction } = body;
 
         const apiKey = process.env.ZHIPU_API_KEY;
 
@@ -77,7 +83,18 @@ You write clear, concise, and engaging documentation that follows best practices
 Always use proper markdown formatting.
 Be specific and practical in your examples.`;
 
-        const userPrompt = `Project Name: ${projectName || 'Unnamed Project'}
+        let userPrompt = '';
+        if (section === 'refine' && existingContent && instruction) {
+            userPrompt = `Refine the following content:
+\`\`\`markdown
+${existingContent}
+\`\`\`
+
+Instruction: ${instruction}
+
+${SECTION_PROMPTS.refine}`;
+        } else {
+            userPrompt = `Project Name: ${projectName || 'Unnamed Project'}
 Project Description: ${projectDescription || 'A software project'}
 Tech Stack: ${techStack.length > 0 ? techStack.join(', ') : 'Not specified'}
 ${additionalContext ? `Additional Context: ${additionalContext}` : ''}
@@ -85,6 +102,7 @@ ${additionalContext ? `Additional Context: ${additionalContext}` : ''}
 ${sectionPrompt}
 
 Generate the content in markdown format. Be professional, concise, and engaging.`;
+        }
 
         const response = await fetch(ZHIPU_API_URL, {
             method: 'POST',

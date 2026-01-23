@@ -31,8 +31,18 @@ export const AIAssistant = ({ onClose }: AIAssistantProps) => {
         { id: 'contributing', label: 'Contributing', icon: '🤝' },
     ];
 
-    const handleGenerate = async () => {
-        if (!data.projectInfo.name && !prompt) {
+    const getCurrentContent = () => {
+        switch (selectedSection) {
+            case 'description': return data.projectInfo.description;
+            case 'installation': return data.installation.installCommands; // simplified for now
+            case 'usage': return data.usage.quickStart;
+            case 'contributing': return data.contributing.guidelines;
+            default: return '';
+        }
+    };
+
+    const handleGenerate = async (isRefining = false) => {
+        if (!data.projectInfo.name && !prompt && !isRefining) {
             setError('Please enter a project name or describe your project');
             return;
         }
@@ -42,6 +52,8 @@ export const AIAssistant = ({ onClose }: AIAssistantProps) => {
         setGeneratedContent('');
 
         try {
+            const currentContent = getCurrentContent();
+
             const response = await fetch('/api/generate-readme', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -49,8 +61,10 @@ export const AIAssistant = ({ onClose }: AIAssistantProps) => {
                     projectName: data.projectInfo.name,
                     projectDescription: data.projectInfo.description || prompt,
                     techStack: data.techStack,
-                    section: selectedSection,
+                    section: isRefining ? 'refine' : selectedSection,
                     additionalContext: prompt,
+                    existingContent: isRefining ? currentContent : undefined,
+                    instruction: isRefining ? prompt : undefined
                 }),
             });
 
@@ -79,14 +93,16 @@ export const AIAssistant = ({ onClose }: AIAssistantProps) => {
                 // Parse features and add them
                 const featureLines = generatedContent.split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
                 featureLines.forEach(line => {
-                    const match = line.match(/^[-•]\s*(.+?):\s*(.+)$/);
-                    if (match) {
-                        // This would need to call addFeature with parsed content
-                    }
+                    // Simple parsing, could be improved
+                    const match = line.match(/^[-•]\s*(.+?)(?::\s*(.+))?$/);
+                    // This logic would need actual store access to add items, 
+                    // for now we warn or need to implement addFeature in component
                 });
                 break;
             case 'installation':
-                updateNestedData('installation', 'additionalSteps', generatedContent);
+                if (selectedSection === 'installation') {
+                    updateNestedData('installation', 'installCommands', generatedContent);
+                }
                 break;
             case 'usage':
                 updateNestedData('usage', 'quickStart', generatedContent);
@@ -95,11 +111,11 @@ export const AIAssistant = ({ onClose }: AIAssistantProps) => {
                 updateNestedData('contributing', 'guidelines', generatedContent);
                 break;
             default:
-                // For full README, we'd need more complex parsing
                 break;
         }
 
         setGeneratedContent('');
+        // Optional: show success toast
     };
 
     const handleCopy = async () => {
@@ -122,27 +138,22 @@ export const AIAssistant = ({ onClose }: AIAssistantProps) => {
                     <span className="font-semibold text-white">AI Assistant</span>
                     <span className="text-xs text-[#8b949e]">Powered by GLM-4</span>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClose}
-                    className="h-7 w-7 p-0 text-[#8b949e] hover:text-white hover:bg-[#21262d]"
-                >
+                <Button variant="ghost" size="sm" onClick={onClose} className="h-7 w-7 p-0 text-[#8b949e] hover:text-white hover:bg-[#21262d]">
                     <X className="w-4 h-4" />
                 </Button>
             </div>
 
             {/* Section Selector */}
             <div className="p-4 border-b border-[#30363d]">
-                <label className="text-xs text-[#8b949e] mb-2 block">Generate content for:</label>
+                <label className="text-xs text-[#8b949e] mb-2 block">Target Section:</label>
                 <div className="flex flex-wrap gap-2">
                     {sections.map((section) => (
                         <button
                             key={section.id}
                             onClick={() => setSelectedSection(section.id)}
                             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${selectedSection === section.id
-                                    ? 'bg-[#a371f7] text-white'
-                                    : 'bg-[#21262d] text-[#8b949e] hover:text-white border border-[#30363d]'
+                                ? 'bg-[#a371f7] text-white'
+                                : 'bg-[#21262d] text-[#8b949e] hover:text-white border border-[#30363d]'
                                 }`}
                         >
                             {section.icon} {section.label}
@@ -154,24 +165,23 @@ export const AIAssistant = ({ onClose }: AIAssistantProps) => {
             {/* Context Input */}
             <div className="p-4 border-b border-[#30363d]">
                 <label className="text-xs text-[#8b949e] mb-2 block">
-                    Describe your project or provide additional context:
+                    Instructions / Context:
                 </label>
                 <div className="relative">
                     <Textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="e.g., A React component library for building modern dashboards with charts, tables, and widgets..."
+                        placeholder="e.g., Make it more professional, add a note about API keys..."
                         className="min-h-[100px] bg-[#0d1117] border-[#30363d] text-white placeholder:text-[#484f58] resize-none"
                     />
                 </div>
 
-                {/* Quick suggestions */}
                 <div className="mt-2 flex flex-wrap gap-1">
                     <span className="text-xs text-[#8b949e]">Try:</span>
-                    {['CLI tool', 'React library', 'REST API', 'Full-stack app'].map((suggestion) => (
+                    {['Make it funny', 'More technical', 'Summarize', 'Fix grammar'].map((suggestion) => (
                         <button
                             key={suggestion}
-                            onClick={() => setPrompt(prev => prev + ' ' + suggestion)}
+                            onClick={() => setPrompt(suggestion)}
                             className="text-xs px-2 py-0.5 rounded bg-[#21262d] text-[#58a6ff] hover:bg-[#30363d] transition-colors"
                         >
                             {suggestion}
@@ -180,52 +190,47 @@ export const AIAssistant = ({ onClose }: AIAssistantProps) => {
                 </div>
             </div>
 
-            {/* Generate Button */}
-            <div className="px-4 py-3 border-b border-[#30363d]">
+            {/* Actions */}
+            <div className="px-4 py-3 border-b border-[#30363d] flex gap-2">
                 <Button
-                    onClick={handleGenerate}
+                    onClick={() => handleGenerate(false)}
                     disabled={isGenerating}
-                    className="w-full bg-gradient-to-r from-[#a371f7] to-[#8957e5] hover:from-[#8957e5] hover:to-[#7c3aed] text-white gap-2"
+                    className="flex-1 bg-gradient-to-r from-[#a371f7] to-[#8957e5] hover:from-[#8957e5] hover:to-[#7c3aed] text-white gap-2"
                 >
-                    {isGenerating ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Generating...
-                        </>
-                    ) : (
-                        <>
-                            <Wand2 className="w-4 h-4" />
-                            Generate with AI
-                        </>
-                    )}
+                    {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                    Generate New
                 </Button>
 
-                {error && (
-                    <p className="mt-2 text-xs text-red-400">{error}</p>
+                {getCurrentContent() && (
+                    <Button
+                        onClick={() => handleGenerate(true)}
+                        disabled={isGenerating || !prompt}
+                        className="flex-1 bg-[#238636] hover:bg-[#2ea043] text-white gap-2"
+                    >
+                        {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                        Refine Existing
+                    </Button>
                 )}
             </div>
+
+            {error && (
+                <div className="px-4 pb-2">
+                    <p className="text-xs text-red-400">{error}</p>
+                </div>
+            )}
 
             {/* Generated Content */}
             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                 {generatedContent ? (
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <span className="text-xs text-[#8b949e]">Generated Content:</span>
+                            <span className="text-xs text-[#8b949e]">Result:</span>
                             <div className="flex gap-2">
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={handleCopy}
-                                    className="h-7 px-2 text-[#8b949e] hover:text-white"
-                                >
+                                <Button size="sm" variant="ghost" onClick={handleCopy} className="h-7 px-2 text-[#8b949e] hover:text-white">
                                     {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
                                 </Button>
-                                <Button
-                                    size="sm"
-                                    onClick={handleApply}
-                                    className="h-7 px-3 bg-[#238636] hover:bg-[#2ea043] text-white text-xs"
-                                >
-                                    Apply to Form
+                                <Button size="sm" onClick={handleApply} className="h-7 px-3 bg-[#238636] hover:bg-[#2ea043] text-white text-xs">
+                                    Apply
                                 </Button>
                             </div>
                         </div>
@@ -236,15 +241,8 @@ export const AIAssistant = ({ onClose }: AIAssistantProps) => {
                         </div>
                     </div>
                 ) : (
-                    <div className="h-full flex items-center justify-center text-center">
-                        <div className="space-y-3">
-                            <div className="w-16 h-16 mx-auto rounded-full bg-[#161b22] border border-[#30363d] flex items-center justify-center">
-                                <Sparkles className="w-8 h-8 text-[#484f58]" />
-                            </div>
-                            <p className="text-[#8b949e] text-sm">
-                                Select a section and describe your project to generate professional README content
-                            </p>
-                        </div>
+                    <div className="h-full flex items-center justify-center text-center opacity-50">
+                        <p className="text-[#8b949e] text-sm">Targeting: {sections.find(s => s.id === selectedSection)?.label}</p>
                     </div>
                 )}
             </div>

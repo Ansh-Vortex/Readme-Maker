@@ -124,37 +124,76 @@ export const RepoAnalyzer = ({ repo, onComplete, onBack }: RepoAnalyzerProps) =>
 
         // Add badges based on repo info
         const badges = [];
-        if (analysis.license) {
+
+        // License Badge
+        const licenseValue = analysis.license === 'NOASSERTION' ? null : analysis.license;
+        if (licenseValue || analysis.licenseName) {
             badges.push({
                 id: crypto.randomUUID(),
                 label: 'License',
-                message: analysis.license,
+                message: licenseValue || 'License',
                 color: '0080ff',
                 style: 'for-the-badge' as const,
                 logoName: '',
                 logoColor: 'white',
             });
         }
-        if (analysis.primaryLanguage) {
-            const langColors: Record<string, string> = {
-                'TypeScript': '3178C6',
-                'JavaScript': 'F7DF1E',
-                'Python': '3776AB',
-                'Java': 'ED8B00',
-                'Go': '00ADD8',
-                'Rust': '000000',
-                'C++': '00599C',
-            };
+
+        // Language Badges - Generate for all languages
+        const langColors: Record<string, string> = {
+            'TypeScript': '3178C6',
+            'JavaScript': 'F7DF1E',
+            'Python': '3776AB',
+            'Java': 'ED8B00',
+            'Go': '00ADD8',
+            'Rust': '000000',
+            'C++': '00599C',
+            'C': '555555',
+            'C#': '239120',
+            'PHP': '777BB4',
+            'Ruby': 'CC342D',
+            'Swift': 'F05138',
+            'Kotlin': '7F52FF',
+            'Dart': '0175C2',
+            'Lua': '2C2D72',
+            'Shell': '89E051',
+            'HTML': 'E34F26',
+            'CSS': '563D7C',
+            'Vue': '4FC08D',
+        };
+
+        const processedLangs = new Set();
+
+        // Add primary language first
+        if (analysis.primaryLanguage && !processedLangs.has(analysis.primaryLanguage)) {
             badges.push({
                 id: crypto.randomUUID(),
                 label: analysis.primaryLanguage,
                 message: '',
                 color: langColors[analysis.primaryLanguage] || '333333',
                 style: 'for-the-badge' as const,
-                logoName: analysis.primaryLanguage.toLowerCase().replace(/[^a-z]/g, ''),
+                logoName: analysis.primaryLanguage.toLowerCase().replace(/[^a-z0-9]/g, ''),
                 logoColor: 'white',
             });
+            processedLangs.add(analysis.primaryLanguage);
         }
+
+        // Add other languages
+        analysis.languages.forEach(lang => {
+            if (!processedLangs.has(lang.name)) {
+                badges.push({
+                    id: crypto.randomUUID(),
+                    label: lang.name,
+                    message: '',
+                    color: langColors[lang.name] || '333333',
+                    style: 'for-the-badge' as const,
+                    logoName: lang.name.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                    logoColor: 'white',
+                });
+                processedLangs.add(lang.name);
+            }
+        });
+
         badges.push({
             id: crypto.randomUUID(),
             label: 'Stars',
