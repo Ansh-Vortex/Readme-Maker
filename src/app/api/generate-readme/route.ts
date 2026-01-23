@@ -140,7 +140,11 @@ Generate the content in markdown format. Be professional, concise, and engaging.
 
         if (!response.ok) {
             const errorData = await response.text();
-            console.error('Zhipu API error:', errorData);
+            console.error('❌ Zhipu API Error:', {
+                status: response.status,
+                statusText: response.statusText,
+                error: errorData
+            });
             return NextResponse.json(
                 { error: 'Failed to generate content. Please check your API key and try again.' },
                 { status: response.status }
@@ -148,6 +152,11 @@ Generate the content in markdown format. Be professional, concise, and engaging.
         }
 
         const data = await response.json();
+        console.log('✅ Zhipu API Success:', {
+            model: data.model,
+            hasOutput: !!data.output_text,
+            preview: data.output_text?.substring(0, 50)
+        });
         const content = data.output_text || '';
 
         return NextResponse.json({ content, section });

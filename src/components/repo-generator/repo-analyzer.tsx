@@ -329,6 +329,8 @@ npm run dev`
             if (descResponse.ok) {
                 const data = await descResponse.json();
                 updateNestedData('projectInfo', 'description', data.content);
+            } else {
+                throw new Error(`Description Gen Failed: ${descResponse.statusText}`);
             }
 
             // 2. Generate Features
@@ -441,9 +443,9 @@ npm run dev`
                 updateNestedData('contributing', 'guidelines', data.content);
             }
 
-        } catch (e) {
-            console.error('AI generation failed:', e);
-            // Continue with whatever data we have
+        } catch (e: any) {
+            console.error('❌ AI generation critical failure:', e);
+            alert(`AI Generation Failed: ${e.message || 'Unknown error'}. Check console.`);
         }
 
         // Regenerate the markdown
