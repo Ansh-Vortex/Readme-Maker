@@ -68,7 +68,7 @@ export const ScreenshotsSection = () => {
                             </Label>
                         </div>
                         <Button
-                            onClick={addScreenshot}
+                            onClick={() => addScreenshot()}
                             size="sm"
                             className="bg-[#238636] hover:bg-[#2ea043] text-white text-xs"
                         >
