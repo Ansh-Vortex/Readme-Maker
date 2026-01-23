@@ -330,7 +330,8 @@ npm run dev`
                 const data = await descResponse.json();
                 updateNestedData('projectInfo', 'description', data.content);
             } else {
-                throw new Error(`Description Gen Failed: ${descResponse.statusText}`);
+                const errText = await descResponse.text();
+                throw new Error(`Description Gen Failed (${descResponse.status}): ${errText}`);
             }
 
             // 2. Generate Features

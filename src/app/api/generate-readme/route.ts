@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Updated API Endpoint for Z.ai GLM-4.7
-const ZHIPU_API_URL = 'https://api.z.ai/api/coding/paas/v4';
+// Updated API Endpoint for Z.ai GLM-4.7 - Chat Completions
+const ZHIPU_API_URL = 'https://api.z.ai/api/coding/paas/v4/chat/completions';
 
 interface GenerateRequest {
     projectName: string;
@@ -123,9 +123,6 @@ ${sectionPrompt}
 Generate the content in markdown format. Be professional, concise, and engaging.`;
         }
 
-        // Combine system prompt and user input for the 'input' field requirement of the new API
-        const combinedInput = `${systemPrompt}\n\n${userInput}`;
-
         const response = await fetch(ZHIPU_API_URL, {
             method: 'POST',
             headers: {
@@ -134,7 +131,10 @@ Generate the content in markdown format. Be professional, concise, and engaging.
             },
             body: JSON.stringify({
                 model: 'glm-4.7',
-                input: combinedInput,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userInput },
+                ],
             }),
         });
 
@@ -154,10 +154,10 @@ Generate the content in markdown format. Be professional, concise, and engaging.
         const data = await response.json();
         console.log('✅ Zhipu API Success:', {
             model: data.model,
-            hasOutput: !!data.output_text,
-            preview: data.output_text?.substring(0, 50)
+            hasOutput: !!data.choices?.[0]?.message?.content,
+            preview: data.choices?.[0]?.message?.content?.substring(0, 50)
         });
-        const content = data.output_text || '';
+        const content = data.choices?.[0]?.message?.content || '';
 
         return NextResponse.json({ content, section });
 
