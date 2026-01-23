@@ -22,21 +22,23 @@ export function generateRepoReadme(data: RepoReadmeData): string {
 
         // Badges
         if (data.projectInfo.badges.length > 0) {
-            const badgeMarkdown = data.projectInfo.badges.map(badge => {
+            const badgeHtml = data.projectInfo.badges.map(badge => {
+                let url = '';
                 if (badge.customUrl) {
-                    return `![${badge.label}](${badge.customUrl})`;
-                }
-                let url = `https://img.shields.io/badge/${encodeURIComponent(badge.label)}-${encodeURIComponent(badge.message)}-${badge.color}`;
-                url += `?style=${badge.style}`;
-                if (badge.logoName) {
-                    url += `&logo=${badge.logoName}`;
-                    if (badge.logoColor) {
-                        url += `&logoColor=${badge.logoColor}`;
+                    url = badge.customUrl;
+                } else {
+                    url = `https://img.shields.io/badge/${encodeURIComponent(badge.label)}-${encodeURIComponent(badge.message)}-${badge.color}`;
+                    url += `?style=${badge.style}`;
+                    if (badge.logoName) {
+                        url += `&logo=${badge.logoName}`;
+                        if (badge.logoColor) {
+                            url += `&logoColor=${badge.logoColor}`;
+                        }
                     }
                 }
-                return `![${badge.label}](${url})`;
+                return `<img src="${url}" alt="${badge.label}" />`;
             }).join(' ');
-            header += `<p align="center">\n  ${badgeMarkdown}\n</p>\n\n`;
+            header += `<p align="center">\n  ${badgeHtml}\n</p>\n\n`;
         }
 
         // Links
@@ -103,7 +105,17 @@ export function generateRepoReadme(data: RepoReadmeData): string {
     if (data.techStack.length > 0) {
         let techSection = '## Tech Stack\n\n';
         techSection += `<p align="left">\n`;
-        techSection += `  <img src="https://skillicons.dev/icons?i=${data.techStack.join(',')}" alt="Tech Stack" />\n`;
+
+        // Map tech stack items to shield badges
+        const techBadges = data.techStack.map(tech => {
+            // Simple mapping for color/logo, could be expanded
+            const encodedTech = encodeURIComponent(tech);
+            // Dynamic generation using simple colors or default matching
+            // Using a generic style for tech stack items
+            return `<img src="https://img.shields.io/badge/${encodedTech}-black?style=flat-square&logo=${encodedTech}&logoColor=white" alt="${tech}" />`;
+        }).join(' ');
+
+        techSection += `  ${techBadges}\n`;
         techSection += `</p>\n`;
         sections.push(techSection);
         tocItems.push('- [Tech Stack](#tech-stack)');
