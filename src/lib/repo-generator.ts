@@ -48,8 +48,6 @@ export function generateRepoReadme(data: RepoReadmeData): string {
             header += `\n  <p>\n    ${badgeRow}\n  </p>\n`;
         }
 
-        header += `\n`;
-
         // 5. Website / Links
         const links: string[] = [];
         if (data.projectInfo.websiteUrl) {
@@ -62,15 +60,17 @@ export function generateRepoReadme(data: RepoReadmeData): string {
             header += `  <p>\n    ${links.join(' • ')}\n  </p>\n`;
         }
 
+        header += `\n`;
+
+        // 6. Description (Moved to Header, Centered)
+        if (data.projectInfo.description) {
+            header += `  <p>\n    ${data.projectInfo.description}\n  </p>\n`;
+        }
+
         header += `</div>\n\n`; // End Center Div
         sections.push(header);
     }
-
-    // Description (Now just a clean paragraph, usually the "About" section comes next)
-    if (data.projectInfo.description) {
-        sections.push(`## About\n\n${data.projectInfo.description}\n`);
-        tocItems.push('- [About](#about)');
-    }
+    // removed separate About section as it is now in header
 
     // Installation
     if (data.installation.enabled) {
