@@ -33,7 +33,7 @@ interface RepoReadmeState {
     removeConfigOption: (id: string, type: 'options' | 'envVariables') => void;
     updateConfigOption: (id: string, type: 'options' | 'envVariables', updates: Partial<ConfigOption>) => void;
     // Screenshot operations
-    addScreenshot: () => void;
+    addScreenshot: (initialData?: Partial<Screenshot>) => void;
     removeScreenshot: (id: string) => void;
     updateScreenshot: (id: string, updates: Partial<Screenshot>) => void;
     // Roadmap operations
