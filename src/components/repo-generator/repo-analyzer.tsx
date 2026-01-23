@@ -402,40 +402,44 @@ npm run dev`
                     return res.json();
                 })
             ]);
-            const data = featuresDetails.value;
-            // Clear existing first
-            useRepoReadmeStore.setState(state => ({
-                data: { ...state.data, features: { ...state.data.features, items: [] } }
-            }));
 
-            // More robust regex to catch "Feature Name: Description" or "Feature Name - Description"
-            // or just bolded items.
-            const featureLines = data.content.split('\n').filter((line: string) =>
-                line.trim().length > 5 && (line.match(/^[-*•]|\d+\./) || line.includes('**'))
-            );
+            // Process Results
+            if (descDetails.status === 'fulfilled') {
+                const content = descDetails.value.content;
+                const taglineMatch = content.match(/Tagline:\s*(.+)/i);
+                const descMatch = content.match(/Description:\s*([\s\S]+)/i);
 
-            for (const line of featureLines.slice(0, 8)) {
-                // Match: (bullet/number) (Title) (separator) (Description)
-                // Group 1: Title (inside ** if present, or just text)
-                // Group 2: Description
-                const match = line.match(/^(?:[-*•\d\.]+\s*)?(?:\*\*)?(.+?)(?:\*\*)?(?:\s*[-–:]\s*)(.+)$/);
+                if (taglineMatch) {
+                    updateNestedData('projectInfo', 'tagline', taglineMatch[1].trim());
+                }
+                if (descMatch) {
+                    updateNestedData('projectInfo', 'description', descMatch[1].trim());
+                } else if (!taglineMatch) {
+                    // Fallback if no format matched
+                    updateNestedData('projectInfo', 'description', content);
+                }
+            }
 
-                if (match) {
-                    addFeature();
-                    await new Promise(r => setTimeout(r, 0));
-                    const features = useRepoReadmeStore.getState().data.features.items;
-                    if (features.length > 0) {
-                        const lastFeature = features[features.length - 1];
-                        updateFeature(lastFeature.id, {
-                            emoji: '✨',
-                            title: match[1]?.trim() || 'Feature',
-                            description: match[2]?.trim() || '',
-                        });
-                    }
-                } else if (line.includes('**')) {
-                    // Fallback for lines that are just "**Title** Description" without separator
-                    const simpleMatch = line.match(/\*\*(.+?)\*\*\s*(.*)/);
-                    if (simpleMatch) {
+            if (featuresDetails.status === 'fulfilled') {
+                const data = featuresDetails.value;
+                // Clear existing first
+                useRepoReadmeStore.setState(state => ({
+                    data: { ...state.data, features: { ...state.data.features, items: [] } }
+                }));
+
+                // More robust regex to catch "Feature Name: Description" or "Feature Name - Description"
+                // or just bolded items.
+                const featureLines = data.content.split('\n').filter((line: string) =>
+                    line.trim().length > 5 && (line.match(/^[-*•]|\d+\./) || line.includes('**'))
+                );
+
+                for (const line of featureLines.slice(0, 8)) {
+                    // Match: (bullet/number) (Title) (separator) (Description)
+                    // Group 1: Title (inside ** if present, or just text)
+                    // Group 2: Description
+                    const match = line.match(/^(?:[-*•\d\.]+\s*)?(?:\*\*)?(.+?)(?:\*\*)?(?:\s*[-–:]\s*)(.+)$/);
+
+                    if (match) {
                         addFeature();
                         await new Promise(r => setTimeout(r, 0));
                         const features = useRepoReadmeStore.getState().data.features.items;
@@ -443,181 +447,196 @@ npm run dev`
                             const lastFeature = features[features.length - 1];
                             updateFeature(lastFeature.id, {
                                 emoji: '✨',
-                                title: simpleMatch[1]?.trim(),
-                                description: simpleMatch[2]?.trim() || 'High-performance feature.',
+                                title: match[1]?.trim() || 'Feature',
+                                description: match[2]?.trim() || '',
                             });
+                        }
+                    } else if (line.includes('**')) {
+                        // Fallback for lines that are just "**Title** Description" without separator
+                        const simpleMatch = line.match(/\*\*(.+?)\*\*\s*(.*)/);
+                        if (simpleMatch) {
+                            addFeature();
+                            await new Promise(r => setTimeout(r, 0));
+                            const features = useRepoReadmeStore.getState().data.features.items;
+                            if (features.length > 0) {
+                                const lastFeature = features[features.length - 1];
+                                updateFeature(lastFeature.id, {
+                                    emoji: '✨',
+                                    title: simpleMatch[1]?.trim(),
+                                    description: simpleMatch[2]?.trim() || 'High-performance feature.',
+                                });
+                            }
                         }
                     }
                 }
             }
+
+            // Other sections (Installation, Usage, Contributing) logic would follow here if needed customization
+            if (installDetails.status === 'fulfilled' && installDetails.value) {
+                updateNestedData('installation', 'installCommands', installDetails.value.content);
+                updateNestedData('installation', 'packageManager', 'npm'); // Default
+                updateNestedData('installation', 'enabled', true);
+            }
+
+            if (usageDetails.status === 'fulfilled') {
+                updateNestedData('usage', 'quickStart', usageDetails.value.content);
+                updateNestedData('usage', 'enabled', true);
+            }
+
+            if (contribDetails.status === 'fulfilled') {
+                updateNestedData('contributing', 'guidelines', contribDetails.value.content);
+                updateNestedData('contributing', 'enabled', true);
+            }
+
+
+            setProgress(100);
+            setStep('complete');
+
+        } catch (err: any) {
+            setError(err.message || 'Failed to analyze repository');
+            setStep('error');
         }
-
-            // Parallelize requests for speed
-            const [descDetails, featuresDetails, installDetails, usageDetails, contribDetails] = await Promise.allSettled([
-            // 1. Description
-            fetch('/api/generate-readme', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    projectName: analysis.name,
-                    projectDescription: analysis.description || ('A ' + analysis.primaryLanguage + ' project'),
-                    techStack: analysis.languages.map(l => l.name),
-                    section: 'description',
-                    additionalContext: commonContext,
-                    fileContents: analysis.fileContents,
+    };
+    techStack: analysis.languages.map(l => l.name),
+        section: 'features',
+            additionalContext: commonContext,
+                fileContents: analysis.fileContents,
                 }),
             }).then(async res => {
-                if (!res.ok) throw new Error(await res.text());
-                return res.json();
-            }),
-
-            // 2. Features
-            fetch('/api/generate-readme', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    projectName: analysis.name,
-                    projectDescription: analysis.description || '',
-                    techStack: analysis.languages.map(l => l.name),
-                    section: 'features',
-                    additionalContext: commonContext,
-                    fileContents: analysis.fileContents,
+                    if (!res.ok) throw new Error(await res.text());
+                    return res.json();
                 }),
-            }).then(async res => {
-                if (!res.ok) throw new Error(await res.text());
-                return res.json();
-            }),
 
-            // 3. Installation
-            !analysis.packageInfo ? fetch('/api/generate-readme', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    projectName: analysis.name,
-                    projectDescription: analysis.description || '',
-                    techStack: analysis.languages.map(l => l.name),
-                    section: 'installation',
-                    additionalContext: commonContext,
-                    fileContents: analysis.fileContents,
-                }),
-            }).then(async res => {
-                if (!res.ok) throw new Error(await res.text());
-                return res.json();
-            }) : Promise.resolve(null),
+    // 3. Installation
+    !analysis.packageInfo ? fetch('/api/generate-readme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            projectName: analysis.name,
+            projectDescription: analysis.description || '',
+            techStack: analysis.languages.map(l => l.name),
+            section: 'installation',
+            additionalContext: commonContext,
+            fileContents: analysis.fileContents,
+        }),
+    }).then(async res => {
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    }) : Promise.resolve(null),
 
-            // 4. Usage
-            fetch('/api/generate-readme', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    projectName: analysis.name,
-                    projectDescription: analysis.description || '',
-                    techStack: analysis.languages.map(l => l.name),
-                    section: 'usage',
-                    additionalContext: commonContext,
-                    fileContents: analysis.fileContents,
-                }),
-            }).then(async res => {
-                if (!res.ok) throw new Error(await res.text());
-                return res.json();
-            }),
+    // 4. Usage
+    fetch('/api/generate-readme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            projectName: analysis.name,
+            projectDescription: analysis.description || '',
+            techStack: analysis.languages.map(l => l.name),
+            section: 'usage',
+            additionalContext: commonContext,
+            fileContents: analysis.fileContents,
+        }),
+    }).then(async res => {
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    }),
 
-            // 5. Contributing
-            fetch('/api/generate-readme', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    projectName: analysis.name,
-                    projectDescription: analysis.description || '',
-                    techStack: analysis.languages.map(l => l.name),
-                    section: 'contributing',
-                    additionalContext: commonContext,
-                    fileContents: analysis.fileContents,
-                }),
-            }).then(async res => {
-                if (!res.ok) throw new Error(await res.text());
-                return res.json();
-            })
+    // 5. Contributing
+    fetch('/api/generate-readme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            projectName: analysis.name,
+            projectDescription: analysis.description || '',
+            techStack: analysis.languages.map(l => l.name),
+            section: 'contributing',
+            additionalContext: commonContext,
+            fileContents: analysis.fileContents,
+        }),
+    }).then(async res => {
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    })
         ]);
 
-        // Process Results
-        if (descDetails.status === 'fulfilled') {
-            const content = descDetails.value.content;
-            const taglineMatch = content.match(/Tagline:\s*(.+)/i);
-            const descMatch = content.match(/Description:\s*([\s\S]+)/i);
+// Process Results
+if (descDetails.status === 'fulfilled') {
+    const content = descDetails.value.content;
+    const taglineMatch = content.match(/Tagline:\s*(.+)/i);
+    const descMatch = content.match(/Description:\s*([\s\S]+)/i);
 
-            if (taglineMatch) {
-                updateNestedData('projectInfo', 'tagline', taglineMatch[1].trim());
-            }
-            if (descMatch) {
-                updateNestedData('projectInfo', 'description', descMatch[1].trim());
-            } else if (!taglineMatch) {
-                // Fallback if no format matched
-                updateNestedData('projectInfo', 'description', content);
-            }
-        }
+    if (taglineMatch) {
+        updateNestedData('projectInfo', 'tagline', taglineMatch[1].trim());
+    }
+    if (descMatch) {
+        updateNestedData('projectInfo', 'description', descMatch[1].trim());
+    } else if (!taglineMatch) {
+        // Fallback if no format matched
+        updateNestedData('projectInfo', 'description', content);
+    }
+}
 
-        if (featuresDetails.status === 'fulfilled') {
-            const data = featuresDetails.value;
-            // Clear existing first
-            useRepoReadmeStore.setState(state => ({
-                data: { ...state.data, features: { ...state.data.features, items: [] } }
-            }));
+if (featuresDetails.status === 'fulfilled') {
+    const data = featuresDetails.value;
+    // Clear existing first
+    useRepoReadmeStore.setState(state => ({
+        data: { ...state.data, features: { ...state.data.features, items: [] } }
+    }));
 
-            const featureLines = data.content.split('\n').filter((line: string) =>
-                line.trim().match(/^[-*•]|\d+\./)
-            );
+    const featureLines = data.content.split('\n').filter((line: string) =>
+        line.trim().match(/^[-*•]|\d+\./)
+    );
 
-            for (const line of featureLines.slice(0, 8)) {
-                const match = line.match(/^[-*•\d\.]+\s*(.+?)(?:\s*[-–:]\s*(.+))?$/);
-                if (match) {
-                    addFeature();
-                    await new Promise(r => setTimeout(r, 0));
-                    const features = useRepoReadmeStore.getState().data.features.items;
-                    if (features.length > 0) {
-                        const lastFeature = features[features.length - 1];
-                        updateFeature(lastFeature.id, {
-                            emoji: '✨',
-                            title: match[1].replace(/\*\*/g, '').trim(),
-                            description: match[2]?.trim() || '',
-                        });
-                    }
-                }
+    for (const line of featureLines.slice(0, 8)) {
+        const match = line.match(/^[-*•\d\.]+\s*(.+?)(?:\s*[-–:]\s*(.+))?$/);
+        if (match) {
+            addFeature();
+            await new Promise(r => setTimeout(r, 0));
+            const features = useRepoReadmeStore.getState().data.features.items;
+            if (features.length > 0) {
+                const lastFeature = features[features.length - 1];
+                updateFeature(lastFeature.id, {
+                    emoji: '✨',
+                    title: match[1].replace(/\*\*/g, '').trim(),
+                    description: match[2]?.trim() || '',
+                });
             }
         }
+    }
+}
 
-        if (installDetails.status === 'fulfilled' && installDetails.value) {
-            const data = installDetails.value;
-            updateNestedData('installation', 'enabled', true);
-            const codeMatch = data.content.match(/```(?:bash|sh|cmd)?\s*([\s\S]*?)```/);
-            if (codeMatch) {
-                updateNestedData('installation', 'installCommands', codeMatch[1].trim());
-            } else {
-                updateNestedData('installation', 'installCommands', data.content);
-            }
-        }
+if (installDetails.status === 'fulfilled' && installDetails.value) {
+    const data = installDetails.value;
+    updateNestedData('installation', 'enabled', true);
+    const codeMatch = data.content.match(/```(?:bash|sh|cmd)?\s*([\s\S]*?)```/);
+    if (codeMatch) {
+        updateNestedData('installation', 'installCommands', codeMatch[1].trim());
+    } else {
+        updateNestedData('installation', 'installCommands', data.content);
+    }
+}
 
-        if (usageDetails.status === 'fulfilled') {
-            const data = usageDetails.value;
-            updateNestedData('usage', 'enabled', true);
-            updateNestedData('usage', 'usageDescription', data.content);
-        }
+if (usageDetails.status === 'fulfilled') {
+    const data = usageDetails.value;
+    updateNestedData('usage', 'enabled', true);
+    updateNestedData('usage', 'usageDescription', data.content);
+}
 
-        if (contribDetails.status === 'fulfilled') {
-            const data = contribDetails.value;
-            updateNestedData('contributing', 'enabled', true);
-            updateNestedData('contributing', 'guidelines', data.content);
-        }
+if (contribDetails.status === 'fulfilled') {
+    const data = contribDetails.value;
+    updateNestedData('contributing', 'enabled', true);
+    updateNestedData('contributing', 'guidelines', data.content);
+}
 
-        setProgress(100);
+setProgress(100);
 
     } catch (e: any) {
-        console.error('❌ AI generation critical failure:', e);
-        alert(`AI Generation Failed: ${e.message || 'Unknown error'}. Check console.`);
-    }
+    console.error('❌ AI generation critical failure:', e);
+    alert(`AI Generation Failed: ${e.message || 'Unknown error'}. Check console.`);
+}
 
-    // Regenerate the markdown
-    regenerateMarkdown();
+// Regenerate the markdown
+regenerateMarkdown();
 };
 
 return (
