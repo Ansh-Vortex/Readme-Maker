@@ -307,72 +307,17 @@ npm run dev`
 
             const commonContext = [
                 `Project Name: ${analysis.name}`,
-                `Repository URL: https://github.com/${repoOwner}/${repoName}`,
-                `Clone Command: git clone https://github.com/${repoOwner}/${repoName}.git`,
+                `Repository URL: https://github.com/${analysis.owner.login}/${analysis.name}`,
+                `Clone Command: git clone https://github.com/${analysis.owner.login}/${analysis.name}.git`,
                 'This is a ' + (analysis.private ? 'private' : 'public') + ' repository.',
                 'Main language: ' + analysis.primaryLanguage,
                 'Topics: ' + analysis.topics.join(', '),
                 depsInfo
             ].filter(Boolean).join('\n');
 
-            // Parallelize requests...
-            // ... (rest of parallel calls remains same, just ensuring context is used)
-
-            // Fix Feature Regex in processing
-            if (featuresDetails.status === 'fulfilled') {
-                const data = featuresDetails.value;
-                // Clear existing first
-                useRepoReadmeStore.setState(state => ({
-                    data: { ...state.data, features: { ...state.data.features, items: [] } }
-                }));
-
-                // More robust regex to catch "Feature Name: Description" or "Feature Name - Description"
-                // or just bolded items.
-                const featureLines = data.content.split('\n').filter((line: string) =>
-                    line.trim().length > 5 && (line.match(/^[-*•]|\d+\./) || line.includes('**'))
-                );
-
-                for (const line of featureLines.slice(0, 8)) {
-                    // Match: (bullet/number) (Title) (separator) (Description)
-                    // Group 1: Title (inside ** if present, or just text)
-                    // Group 2: Description
-                    const match = line.match(/^(?:[-*•\d\.]+\s*)?(?:\*\*)?(.+?)(?:\*\*)?(?:\s*[-–:]\s*)(.+)$/);
-
-                    if (match) {
-                        addFeature();
-                        await new Promise(r => setTimeout(r, 0));
-                        const features = useRepoReadmeStore.getState().data.features.items;
-                        if (features.length > 0) {
-                            const lastFeature = features[features.length - 1];
-                            updateFeature(lastFeature.id, {
-                                emoji: '✨',
-                                title: match[1]?.trim() || 'Feature',
-                                description: match[2]?.trim() || '',
-                            });
-                        }
-                    } else if (line.includes('**')) {
-                        // Fallback for lines that are just "**Title** Description" without separator
-                        const simpleMatch = line.match(/\*\*(.+?)\*\*\s*(.*)/);
-                        if (simpleMatch) {
-                            addFeature();
-                            await new Promise(r => setTimeout(r, 0));
-                            const features = useRepoReadmeStore.getState().data.features.items;
-                            if (features.length > 0) {
-                                const lastFeature = features[features.length - 1];
-                                updateFeature(lastFeature.id, {
-                                    emoji: '✨',
-                                    title: simpleMatch[1]?.trim(),
-                                    description: simpleMatch[2]?.trim() || 'High-performance feature.',
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-
             // Parallelize requests for speed
             const [descDetails, featuresDetails, installDetails, usageDetails, contribDetails] = await Promise.allSettled([
-                // 1. Description
+                // 1. Description (and Tagline)
                 fetch('/api/generate-readme', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -457,38 +402,40 @@ npm run dev`
                     return res.json();
                 })
             ]);
+            const data = featuresDetails.value;
+            // Clear existing first
+            useRepoReadmeStore.setState(state => ({
+                data: { ...state.data, features: { ...state.data.features, items: [] } }
+            }));
 
-            // Process Results
-            if (descDetails.status === 'fulfilled') {
-                const content = descDetails.value.content;
-                const taglineMatch = content.match(/Tagline:\s*(.+)/i);
-                const descMatch = content.match(/Description:\s*([\s\S]+)/i);
+            // More robust regex to catch "Feature Name: Description" or "Feature Name - Description"
+            // or just bolded items.
+            const featureLines = data.content.split('\n').filter((line: string) =>
+                line.trim().length > 5 && (line.match(/^[-*•]|\d+\./) || line.includes('**'))
+            );
 
-                if (taglineMatch) {
-                    updateNestedData('projectInfo', 'tagline', taglineMatch[1].trim());
-                }
-                if (descMatch) {
-                    updateNestedData('projectInfo', 'description', descMatch[1].trim());
-                } else if (!taglineMatch) {
-                    // Fallback if no format matched
-                    updateNestedData('projectInfo', 'description', content);
-                }
-            }
+            for (const line of featureLines.slice(0, 8)) {
+                // Match: (bullet/number) (Title) (separator) (Description)
+                // Group 1: Title (inside ** if present, or just text)
+                // Group 2: Description
+                const match = line.match(/^(?:[-*•\d\.]+\s*)?(?:\*\*)?(.+?)(?:\*\*)?(?:\s*[-–:]\s*)(.+)$/);
 
-            if (featuresDetails.status === 'fulfilled') {
-                const data = featuresDetails.value;
-                // Clear existing first
-                useRepoReadmeStore.setState(state => ({
-                    data: { ...state.data, features: { ...state.data.features, items: [] } }
-                }));
-
-                const featureLines = data.content.split('\n').filter((line: string) =>
-                    line.trim().match(/^[-*•]|\d+\./)
-                );
-
-                for (const line of featureLines.slice(0, 8)) {
-                    const match = line.match(/^[-*•\d\.]+\s*(.+?)(?:\s*[-–:]\s*(.+))?$/);
-                    if (match) {
+                if (match) {
+                    addFeature();
+                    await new Promise(r => setTimeout(r, 0));
+                    const features = useRepoReadmeStore.getState().data.features.items;
+                    if (features.length > 0) {
+                        const lastFeature = features[features.length - 1];
+                        updateFeature(lastFeature.id, {
+                            emoji: '✨',
+                            title: match[1]?.trim() || 'Feature',
+                            description: match[2]?.trim() || '',
+                        });
+                    }
+                } else if (line.includes('**')) {
+                    // Fallback for lines that are just "**Title** Description" without separator
+                    const simpleMatch = line.match(/\*\*(.+?)\*\*\s*(.*)/);
+                    if (simpleMatch) {
                         addFeature();
                         await new Promise(r => setTimeout(r, 0));
                         const features = useRepoReadmeStore.getState().data.features.items;
@@ -496,153 +443,288 @@ npm run dev`
                             const lastFeature = features[features.length - 1];
                             updateFeature(lastFeature.id, {
                                 emoji: '✨',
-                                title: match[1].replace(/\*\*/g, '').trim(),
-                                description: match[2]?.trim() || '',
+                                title: simpleMatch[1]?.trim(),
+                                description: simpleMatch[2]?.trim() || 'High-performance feature.',
                             });
                         }
                     }
                 }
             }
-
-            if (installDetails.status === 'fulfilled' && installDetails.value) {
-                const data = installDetails.value;
-                updateNestedData('installation', 'enabled', true);
-                const codeMatch = data.content.match(/```(?:bash|sh|cmd)?\s*([\s\S]*?)```/);
-                if (codeMatch) {
-                    updateNestedData('installation', 'installCommands', codeMatch[1].trim());
-                } else {
-                    updateNestedData('installation', 'installCommands', data.content);
-                }
-            }
-
-            if (usageDetails.status === 'fulfilled') {
-                const data = usageDetails.value;
-                updateNestedData('usage', 'enabled', true);
-                updateNestedData('usage', 'usageDescription', data.content);
-            }
-
-            if (contribDetails.status === 'fulfilled') {
-                const data = contribDetails.value;
-                updateNestedData('contributing', 'enabled', true);
-                updateNestedData('contributing', 'guidelines', data.content);
-            }
-
-            setProgress(100);
-
-        } catch (e: any) {
-            console.error('❌ AI generation critical failure:', e);
-            alert(`AI Generation Failed: ${e.message || 'Unknown error'}. Check console.`);
         }
 
-        // Regenerate the markdown
-        regenerateMarkdown();
-    };
+            // Parallelize requests for speed
+            const [descDetails, featuresDetails, installDetails, usageDetails, contribDetails] = await Promise.allSettled([
+            // 1. Description
+            fetch('/api/generate-readme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: analysis.name,
+                    projectDescription: analysis.description || ('A ' + analysis.primaryLanguage + ' project'),
+                    techStack: analysis.languages.map(l => l.name),
+                    section: 'description',
+                    additionalContext: commonContext,
+                    fileContents: analysis.fileContents,
+                }),
+            }).then(async res => {
+                if (!res.ok) throw new Error(await res.text());
+                return res.json();
+            }),
 
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full h-full bg-[#0d1117] flex items-center justify-center"
-        >
-            <div className="max-w-lg w-full p-8">
-                {step === 'error' ? (
-                    <div className="text-center">
-                        <div className="w-16 h-16 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-4">
-                            <AlertCircle className="w-8 h-8 text-red-400" />
-                        </div>
-                        <h2 className="text-xl font-semibold text-white mb-2">Analysis Failed</h2>
-                        <p className="text-[#8b949e] mb-6">{error}</p>
-                        <div className="flex gap-3 justify-center">
-                            <Button onClick={onBack} variant="ghost" className="text-[#8b949e]">
-                                Go Back
-                            </Button>
-                            <Button onClick={analyzeRepo} className="bg-[#238636] hover:bg-[#2ea043] text-white">
-                                Try Again
-                            </Button>
-                        </div>
+            // 2. Features
+            fetch('/api/generate-readme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: analysis.name,
+                    projectDescription: analysis.description || '',
+                    techStack: analysis.languages.map(l => l.name),
+                    section: 'features',
+                    additionalContext: commonContext,
+                    fileContents: analysis.fileContents,
+                }),
+            }).then(async res => {
+                if (!res.ok) throw new Error(await res.text());
+                return res.json();
+            }),
+
+            // 3. Installation
+            !analysis.packageInfo ? fetch('/api/generate-readme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: analysis.name,
+                    projectDescription: analysis.description || '',
+                    techStack: analysis.languages.map(l => l.name),
+                    section: 'installation',
+                    additionalContext: commonContext,
+                    fileContents: analysis.fileContents,
+                }),
+            }).then(async res => {
+                if (!res.ok) throw new Error(await res.text());
+                return res.json();
+            }) : Promise.resolve(null),
+
+            // 4. Usage
+            fetch('/api/generate-readme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: analysis.name,
+                    projectDescription: analysis.description || '',
+                    techStack: analysis.languages.map(l => l.name),
+                    section: 'usage',
+                    additionalContext: commonContext,
+                    fileContents: analysis.fileContents,
+                }),
+            }).then(async res => {
+                if (!res.ok) throw new Error(await res.text());
+                return res.json();
+            }),
+
+            // 5. Contributing
+            fetch('/api/generate-readme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: analysis.name,
+                    projectDescription: analysis.description || '',
+                    techStack: analysis.languages.map(l => l.name),
+                    section: 'contributing',
+                    additionalContext: commonContext,
+                    fileContents: analysis.fileContents,
+                }),
+            }).then(async res => {
+                if (!res.ok) throw new Error(await res.text());
+                return res.json();
+            })
+        ]);
+
+        // Process Results
+        if (descDetails.status === 'fulfilled') {
+            const content = descDetails.value.content;
+            const taglineMatch = content.match(/Tagline:\s*(.+)/i);
+            const descMatch = content.match(/Description:\s*([\s\S]+)/i);
+
+            if (taglineMatch) {
+                updateNestedData('projectInfo', 'tagline', taglineMatch[1].trim());
+            }
+            if (descMatch) {
+                updateNestedData('projectInfo', 'description', descMatch[1].trim());
+            } else if (!taglineMatch) {
+                // Fallback if no format matched
+                updateNestedData('projectInfo', 'description', content);
+            }
+        }
+
+        if (featuresDetails.status === 'fulfilled') {
+            const data = featuresDetails.value;
+            // Clear existing first
+            useRepoReadmeStore.setState(state => ({
+                data: { ...state.data, features: { ...state.data.features, items: [] } }
+            }));
+
+            const featureLines = data.content.split('\n').filter((line: string) =>
+                line.trim().match(/^[-*•]|\d+\./)
+            );
+
+            for (const line of featureLines.slice(0, 8)) {
+                const match = line.match(/^[-*•\d\.]+\s*(.+?)(?:\s*[-–:]\s*(.+))?$/);
+                if (match) {
+                    addFeature();
+                    await new Promise(r => setTimeout(r, 0));
+                    const features = useRepoReadmeStore.getState().data.features.items;
+                    if (features.length > 0) {
+                        const lastFeature = features[features.length - 1];
+                        updateFeature(lastFeature.id, {
+                            emoji: '✨',
+                            title: match[1].replace(/\*\*/g, '').trim(),
+                            description: match[2]?.trim() || '',
+                        });
+                    }
+                }
+            }
+        }
+
+        if (installDetails.status === 'fulfilled' && installDetails.value) {
+            const data = installDetails.value;
+            updateNestedData('installation', 'enabled', true);
+            const codeMatch = data.content.match(/```(?:bash|sh|cmd)?\s*([\s\S]*?)```/);
+            if (codeMatch) {
+                updateNestedData('installation', 'installCommands', codeMatch[1].trim());
+            } else {
+                updateNestedData('installation', 'installCommands', data.content);
+            }
+        }
+
+        if (usageDetails.status === 'fulfilled') {
+            const data = usageDetails.value;
+            updateNestedData('usage', 'enabled', true);
+            updateNestedData('usage', 'usageDescription', data.content);
+        }
+
+        if (contribDetails.status === 'fulfilled') {
+            const data = contribDetails.value;
+            updateNestedData('contributing', 'enabled', true);
+            updateNestedData('contributing', 'guidelines', data.content);
+        }
+
+        setProgress(100);
+
+    } catch (e: any) {
+        console.error('❌ AI generation critical failure:', e);
+        alert(`AI Generation Failed: ${e.message || 'Unknown error'}. Check console.`);
+    }
+
+    // Regenerate the markdown
+    regenerateMarkdown();
+};
+
+return (
+    <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="w-full h-full bg-[#0d1117] flex items-center justify-center"
+    >
+        <div className="max-w-lg w-full p-8">
+            {step === 'error' ? (
+                <div className="text-center">
+                    <div className="w-16 h-16 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+                        <AlertCircle className="w-8 h-8 text-red-400" />
                     </div>
-                ) : step === 'complete' ? (
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="text-center"
-                    >
-                        <div className="w-16 h-16 mx-auto rounded-full bg-[#238636]/20 flex items-center justify-center mb-4">
-                            <Check className="w-8 h-8 text-[#3fb950]" />
-                        </div>
-                        <h2 className="text-xl font-semibold text-white mb-2">README Generated!</h2>
-                        <p className="text-[#8b949e] mb-6">
-                            Your README has been generated from <strong className="text-white">{repo.name}</strong>.
-                            You can now customize it further.
-                        </p>
-                        <Button
-                            onClick={onComplete}
-                            className="bg-gradient-to-r from-[#a371f7] to-[#8957e5] hover:from-[#8957e5] hover:to-[#7c3aed] text-white gap-2"
-                        >
-                            Customize README
-                            <ArrowRight className="w-4 h-4" />
+                    <h2 className="text-xl font-semibold text-white mb-2">Analysis Failed</h2>
+                    <p className="text-[#8b949e] mb-6">{error}</p>
+                    <div className="flex gap-3 justify-center">
+                        <Button onClick={onBack} variant="ghost" className="text-[#8b949e]">
+                            Go Back
                         </Button>
-                    </motion.div>
-                ) : (
-                    <div className="space-y-6">
-                        <div className="text-center">
-                            <div className="w-16 h-16 mx-auto rounded-full bg-[#a371f7]/20 flex items-center justify-center mb-4">
-                                <Wand2 className="w-8 h-8 text-[#a371f7] animate-pulse" />
-                            </div>
-                            <h2 className="text-xl font-semibold text-white mb-2">
-                                {step === 'analyzing' ? 'Analyzing Repository' : 'Generating README'}
-                            </h2>
-                            <p className="text-[#8b949e]">
-                                {repo.fullName}
-                            </p>
-                        </div>
-
-                        {/* Progress bar */}
-                        <div className="w-full h-2 bg-[#21262d] rounded-full overflow-hidden">
-                            <motion.div
-                                className="h-full bg-gradient-to-r from-[#a371f7] to-[#8957e5]"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${progress}%` }}
-                                transition={{ duration: 0.5 }}
-                            />
-                        </div>
-
-                        {/* Steps */}
-                        <div className="space-y-3">
-                            {analyzeSteps.map((s, i) => (
-                                <div
-                                    key={i}
-                                    className={`flex items-center gap-3 p-3 rounded-lg transition-all ${i === currentStep
-                                        ? 'bg-[#161b22] border border-[#a371f7]'
-                                        : i < currentStep
-                                            ? 'bg-[#161b22]/50 border border-[#238636]'
-                                            : 'bg-[#161b22]/30 border border-[#30363d]'
-                                        }`}
-                                >
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${i < currentStep
-                                        ? 'bg-[#238636]/20'
-                                        : i === currentStep
-                                            ? 'bg-[#a371f7]/20'
-                                            : 'bg-[#21262d]'
-                                        }`}>
-                                        {i < currentStep ? (
-                                            <Check className="w-4 h-4 text-[#3fb950]" />
-                                        ) : i === currentStep ? (
-                                            <Loader2 className="w-4 h-4 text-[#a371f7] animate-spin" />
-                                        ) : (
-                                            <s.icon className="w-4 h-4 text-[#484f58]" />
-                                        )}
-                                    </div>
-                                    <span className={`text-sm ${i <= currentStep ? 'text-white' : 'text-[#484f58]'
-                                        }`}>
-                                        {s.label}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+                        <Button onClick={analyzeRepo} className="bg-[#238636] hover:bg-[#2ea043] text-white">
+                            Try Again
+                        </Button>
                     </div>
-                )}
-            </div>
-        </motion.div>
-    );
+                </div>
+            ) : step === 'complete' ? (
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-center"
+                >
+                    <div className="w-16 h-16 mx-auto rounded-full bg-[#238636]/20 flex items-center justify-center mb-4">
+                        <Check className="w-8 h-8 text-[#3fb950]" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-white mb-2">README Generated!</h2>
+                    <p className="text-[#8b949e] mb-6">
+                        Your README has been generated from <strong className="text-white">{repo.name}</strong>.
+                        You can now customize it further.
+                    </p>
+                    <Button
+                        onClick={onComplete}
+                        className="bg-gradient-to-r from-[#a371f7] to-[#8957e5] hover:from-[#8957e5] hover:to-[#7c3aed] text-white gap-2"
+                    >
+                        Customize README
+                        <ArrowRight className="w-4 h-4" />
+                    </Button>
+                </motion.div>
+            ) : (
+                <div className="space-y-6">
+                    <div className="text-center">
+                        <div className="w-16 h-16 mx-auto rounded-full bg-[#a371f7]/20 flex items-center justify-center mb-4">
+                            <Wand2 className="w-8 h-8 text-[#a371f7] animate-pulse" />
+                        </div>
+                        <h2 className="text-xl font-semibold text-white mb-2">
+                            {step === 'analyzing' ? 'Analyzing Repository' : 'Generating README'}
+                        </h2>
+                        <p className="text-[#8b949e]">
+                            {repo.fullName}
+                        </p>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="w-full h-2 bg-[#21262d] rounded-full overflow-hidden">
+                        <motion.div
+                            className="h-full bg-gradient-to-r from-[#a371f7] to-[#8957e5]"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ duration: 0.5 }}
+                        />
+                    </div>
+
+                    {/* Steps */}
+                    <div className="space-y-3">
+                        {analyzeSteps.map((s, i) => (
+                            <div
+                                key={i}
+                                className={`flex items-center gap-3 p-3 rounded-lg transition-all ${i === currentStep
+                                    ? 'bg-[#161b22] border border-[#a371f7]'
+                                    : i < currentStep
+                                        ? 'bg-[#161b22]/50 border border-[#238636]'
+                                        : 'bg-[#161b22]/30 border border-[#30363d]'
+                                    }`}
+                            >
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${i < currentStep
+                                    ? 'bg-[#238636]/20'
+                                    : i === currentStep
+                                        ? 'bg-[#a371f7]/20'
+                                        : 'bg-[#21262d]'
+                                    }`}>
+                                    {i < currentStep ? (
+                                        <Check className="w-4 h-4 text-[#3fb950]" />
+                                    ) : i === currentStep ? (
+                                        <Loader2 className="w-4 h-4 text-[#a371f7] animate-spin" />
+                                    ) : (
+                                        <s.icon className="w-4 h-4 text-[#484f58]" />
+                                    )}
+                                </div>
+                                <span className={`text-sm ${i <= currentStep ? 'text-white' : 'text-[#484f58]'
+                                    }`}>
+                                    {s.label}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    </motion.div>
+);
 };
