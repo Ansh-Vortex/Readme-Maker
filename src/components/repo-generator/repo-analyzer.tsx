@@ -460,7 +460,19 @@ npm run dev`
 
             // Process Results
             if (descDetails.status === 'fulfilled') {
-                updateNestedData('projectInfo', 'description', descDetails.value.content);
+                const content = descDetails.value.content;
+                const taglineMatch = content.match(/Tagline:\s*(.+)/i);
+                const descMatch = content.match(/Description:\s*([\s\S]+)/i);
+
+                if (taglineMatch) {
+                    updateNestedData('projectInfo', 'tagline', taglineMatch[1].trim());
+                }
+                if (descMatch) {
+                    updateNestedData('projectInfo', 'description', descMatch[1].trim());
+                } else if (!taglineMatch) {
+                    // Fallback if no format matched
+                    updateNestedData('projectInfo', 'description', content);
+                }
             }
 
             if (featuresDetails.status === 'fulfilled') {

@@ -32,8 +32,9 @@ Include:
 - **License**: The detected license.`,
 
     description: `Write a "Hire-Worthy" introduction.
-- **Hook**: One powerful sentence explaining the *value*.
-- **Content**: 1 strict paragraph (max 3-4 sentences). Focus on "What" and "Why".
+- **Format**:
+Tagline: [One powerful, high-performance sentence]
+Description: [1 strict paragraph (max 3-4 sentences). Focus on "What" and "Why"]
 - **Tone**: Professional, high-performance, and impressive.`,
 
     features: `Generate a feature list that showcases engineering talent.
