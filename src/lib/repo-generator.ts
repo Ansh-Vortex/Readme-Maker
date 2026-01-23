@@ -3,6 +3,7 @@ import { RepoReadmeData, LICENSE_TEMPLATES, TECH_COLORS } from './repo-types';
 export function generateRepoReadme(data: RepoReadmeData): string {
     const sections: string[] = [];
     const tocItems: string[] = [];
+    const tocPlaceholder = '<!-- TOC -->';
 
     // Header with logo and title
     if (data.projectInfo.name) {
@@ -17,10 +18,12 @@ export function generateRepoReadme(data: RepoReadmeData): string {
 
         header += `  <h1>${data.projectInfo.name}</h1>\n`;
 
-        // 2. Slogan/Tagline
+        // 2. Slogan/Tagline - User requested to match image strictly (Title -> Badges -> Link)
+        /*
         if (data.projectInfo.tagline) {
             header += `  <p>\n    <strong>${data.projectInfo.tagline}</strong>\n  </p>\n`;
         }
+        */
 
         // 3. Badges (License, Stars, etc.)
         let badgeRow = '';
