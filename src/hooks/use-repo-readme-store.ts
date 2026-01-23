@@ -404,13 +404,14 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
         }),
 
     // Screenshot operations
-    addScreenshot: () =>
+    addScreenshot: (initialData?: Partial<Screenshot>) =>
         set((state) => {
             const newScreenshot: Screenshot = {
                 id: crypto.randomUUID(),
                 url: '',
                 caption: '',
-                type: 'image'
+                type: 'image',
+                ...initialData
             };
             const newData = {
                 ...state.data,
