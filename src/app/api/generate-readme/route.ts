@@ -32,10 +32,9 @@ Include:
 - **License**: The detected license.`,
 
     description: `Write a "Hire-Worthy" introduction.
-- **Professionalism**: Write as if this is a major open-source product (e.g., Next.js, Stripe).
-- **Hook**: Powerful, problem-solution format.
-- **Content**: 1-2 dense paragraphs. Focus on *value*, *performance*, and *developer experience*.
-- **Tone**: Confident, technically precise, and impressive. No generic fluff.`,
+- **Hook**: One powerful sentence explaining the *value*.
+- **Content**: 1 strict paragraph (max 3-4 sentences). Focus on "What" and "Why".
+- **Tone**: Professional, high-performance, and impressive.`,
 
     features: `Generate a feature list that showcases engineering talent.
 - **Depth**: Don't just list features; explain the *technical implementation* or *value* (e.g., "Zero-config" not just "Easy").

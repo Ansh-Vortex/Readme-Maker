@@ -8,40 +8,49 @@ export function generateRepoReadme(data: RepoReadmeData): string {
     if (data.projectInfo.name) {
         let header = '';
 
-        if (data.projectInfo.bannerUrl) {
-            header += `<p align="center">\n  <img src="${data.projectInfo.bannerUrl}" alt="${data.projectInfo.name} banner" width="100%">\n</p>\n\n`;
-        } else if (data.projectInfo.logoUrl) {
-            header += `<p align="center">\n  <img src="${data.projectInfo.logoUrl}" alt="${data.projectInfo.name} logo" width="120">\n</p>\n\n`;
+        // 1. Title (Centered)
+        header += `<div align="center">\n`;
+
+        if (data.projectInfo.logoUrl) {
+            header += `  <img src="${data.projectInfo.logoUrl}" alt="${data.projectInfo.name} logo" width="120" />\n  <br/>\n`;
         }
 
-        header += `<h1 align="center">${data.projectInfo.name}</h1>\n\n`;
+        header += `  <h1>${data.projectInfo.name}</h1>\n`;
 
+        // 2. Slogan/Tagline
         if (data.projectInfo.tagline) {
-            header += `<p align="center">\n  <strong>${data.projectInfo.tagline}</strong>\n</p>\n\n`;
+            header += `  <p>\n    <strong>${data.projectInfo.tagline}</strong>\n  </p>\n`;
         }
 
-        // Badges
+        // 3. Badges (License, Stars, etc.)
+        let badgeRow = '';
         if (data.projectInfo.badges.length > 0) {
-            const badgeHtml = data.projectInfo.badges.map(badge => {
-                let url = '';
-                if (badge.customUrl) {
-                    url = badge.customUrl;
-                } else {
-                    url = `https://img.shields.io/badge/${encodeURIComponent(badge.label)}-${encodeURIComponent(badge.message)}-${badge.color}`;
-                    url += `?style=${badge.style}`;
-                    if (badge.logoName) {
-                        url += `&logo=${badge.logoName}`;
-                        if (badge.logoColor) {
-                            url += `&logoColor=${badge.logoColor}`;
-                        }
-                    }
-                }
+            badgeRow += data.projectInfo.badges.map(badge => {
+                let url = badge.customUrl ||
+                    `https://img.shields.io/badge/${encodeURIComponent(badge.label)}-${encodeURIComponent(badge.message)}-${badge.color}?style=for-the-badge&logo=${badge.logoName || ''}&logoColor=${badge.logoColor || 'white'}`;
                 return `<img src="${url}" alt="${badge.label}" />`;
             }).join(' ');
-            header += `<p align="center">\n  ${badgeHtml}\n</p>\n\n`;
         }
 
-        // Links
+        // 4. Tech Stack Badges (Merged into header)
+        if (data.techStack.length > 0) {
+            const techBadges = data.techStack.map(tech => {
+                const encodedTech = encodeURIComponent(tech);
+                const colorKey = Object.keys(TECH_COLORS).find(k => k.toLowerCase() === tech.toLowerCase());
+                const color = colorKey ? TECH_COLORS[colorKey] : '2d333b';
+                return `<img src="https://img.shields.io/badge/${encodedTech}-${color}?style=for-the-badge&logo=${encodedTech}&logoColor=white" alt="${tech}" />`;
+            }).join(' ');
+
+            badgeRow += (badgeRow ? ' ' : '') + techBadges;
+        }
+
+        if (badgeRow) {
+            header += `\n  <p>\n    ${badgeRow}\n  </p>\n`;
+        }
+
+        header += `\n`;
+
+        // 5. Website / Links
         const links: string[] = [];
         if (data.projectInfo.websiteUrl) {
             links.push(`[Website](${data.projectInfo.websiteUrl})`);
@@ -50,75 +59,17 @@ export function generateRepoReadme(data: RepoReadmeData): string {
             links.push(`[Demo](${data.projectInfo.demoUrl})`);
         }
         if (links.length > 0) {
-            header += `<p align="center">\n  ${links.join(' • ')}\n</p>\n\n`;
+            header += `  <p>\n    ${links.join(' • ')}\n  </p>\n`;
         }
 
+        header += `</div>\n\n`; // End Center Div
         sections.push(header);
     }
 
-    // Description
+    // Description (Now just a clean paragraph, usually the "About" section comes next)
     if (data.projectInfo.description) {
         sections.push(`## About\n\n${data.projectInfo.description}\n`);
         tocItems.push('- [About](#about)');
-    }
-
-    // Table of Contents
-    const tocPlaceholder = '<!-- TOC_PLACEHOLDER -->';
-    if (data.extras.showTableOfContents) {
-        sections.push(tocPlaceholder);
-    }
-
-    // Screenshots
-    if (data.screenshots.enabled && data.screenshots.items.length > 0) {
-        let screenshotSection = '## Screenshots\n\n';
-        screenshotSection += '<p align="center">\n';
-        data.screenshots.items.forEach(ss => {
-            if (ss.type === 'video') {
-                screenshotSection += `  <a href="${ss.url}">\n    <img src="${ss.url}" alt="${ss.caption}" width="80%">\n  </a>\n`;
-            } else {
-                screenshotSection += `  <img src="${ss.url}" alt="${ss.caption}" width="80%">\n`;
-            }
-            if (ss.caption) {
-                screenshotSection += `  <br><em>${ss.caption}</em><br><br>\n`;
-            }
-        });
-        screenshotSection += '</p>\n';
-        sections.push(screenshotSection);
-        tocItems.push('- [Screenshots](#screenshots)');
-    }
-
-    // Features
-    if (data.features.enabled && data.features.items.length > 0) {
-        let featuresSection = '## Features\n\n';
-        data.features.items.forEach(feature => {
-            featuresSection += `- ${feature.emoji} **${feature.title}**`;
-            if (feature.description) {
-                featuresSection += ` - ${feature.description}`;
-            }
-            featuresSection += '\n';
-        });
-        sections.push(featuresSection);
-        tocItems.push('- [Features](#features)');
-    }
-
-    // Tech Stack
-    if (data.techStack.length > 0) {
-        let techSection = '## Tech Stack\n\n';
-        techSection += `<p align="left">\n`;
-
-        // Map tech stack items to shield badges
-        const techBadges = data.techStack.map(tech => {
-            const encodedTech = encodeURIComponent(tech);
-            // Use 'for-the-badge' style to match header badges
-            const colorKey = Object.keys(TECH_COLORS).find(k => k.toLowerCase() === tech.toLowerCase());
-            const color = colorKey ? TECH_COLORS[colorKey] : '2d333b';
-            return `<img src="https://img.shields.io/badge/${encodedTech}-${color}?style=for-the-badge&logo=${encodedTech}&logoColor=white" alt="${tech}" />`;
-        }).join(' ');
-
-        techSection += `  ${techBadges}\n`;
-        techSection += `</p>\n`;
-        sections.push(techSection);
-        tocItems.push('- [Tech Stack](#tech-stack)');
     }
 
     // Installation
