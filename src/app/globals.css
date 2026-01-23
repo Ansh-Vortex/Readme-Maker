@@ -1,0 +1,504 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
+
+  @keyframes spotlight {
+    0% {
+      opacity: 0;
+      transform: translate(-72%, -62%) scale(0.5);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -40%) scale(1);
+    }
+  }
+
+  --animate-float: float 3s ease-in-out infinite;
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* GitHub Markdown Dark Theme */
+.github-markdown {
+  color: #c9d1d9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.github-markdown img {
+  max-width: 100%;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+.github-markdown p[align="center"],
+.github-markdown div[align="center"] {
+  text-align: center;
+}
+
+.github-markdown p[align="left"],
+.github-markdown div[align="left"] {
+  text-align: left;
+}
+
+/* GitHub README Preview Styles */
+.github-readme {
+  color: #e6edf3;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.github-readme h1[align="center"],
+.github-readme h2[align="center"],
+.github-readme h3[align="center"],
+.github-readme p[align="center"] {
+  text-align: center;
+}
+
+.github-readme p[align="left"] {
+  text-align: left;
+}
+
+.github-readme .gh-h1 {
+  color: #e6edf3;
+  font-size: 32px;
+  font-weight: 600;
+  border-bottom: 1px solid #30363d;
+  padding-bottom: 8px;
+  margin: 16px 0;
+}
+
+.github-readme .gh-h2 {
+  color: #e6edf3;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid #30363d;
+  padding-bottom: 8px;
+  margin: 24px 0 16px 0;
+}
+
+.github-readme .gh-h3 {
+  color: #e6edf3;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+}
+
+.github-readme .gh-p {
+  color: #e6edf3;
+  margin: 16px 0;
+}
+
+.github-readme .gh-link {
+  color: #58a6ff;
+  text-decoration: none;
+}
+
+.github-readme .gh-link:hover {
+  text-decoration: underline;
+}
+
+.github-readme .gh-img {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 4px 2px;
+}
+
+.github-readme .gh-ul {
+  color: #e6edf3;
+  padding-left: 24px;
+  margin: 16px 0;
+}
+
+.github-readme .gh-li {
+  color: #e6edf3;
+  margin: 4px 0;
+}
+
+.github-readme .gh-hr {
+  border: none;
+  border-top: 1px solid #30363d;
+  margin: 24px 0;
+}
+
+.github-readme img {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+.github-readme a {
+  color: #58a6ff;
+  text-decoration: none;
+}
+
+.github-readme a:hover {
+  text-decoration: underline;
+}
+
+.github-readme strong {
+  color: #e6edf3;
+  font-weight: 600;
+}
+
+.github-readme em {
+  color: #e6edf3;
+  font-style: italic;
+}
+
+.github-readme table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.github-readme th,
+.github-readme td {
+  border: 1px solid #30363d;
+  padding: 8px 16px;
+  text-align: left;
+}
+
+.github-readme th {
+  background: #161b22;
+  font-weight: 600;
+}
+
+.github-readme hr {
+  border: none;
+  border-top: 1px solid #30363d;
+  margin: 24px 0;
+}
+
+/* README Body - GitHub Exact Styling */
+.readme-body {
+  color: #e6edf3;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.readme-body h1 {
+  color: #e6edf3;
+  font-size: 2em;
+  font-weight: 600;
+  border-bottom: 1px solid #30363d;
+  padding-bottom: 0.3em;
+  margin: 24px 0 16px 0;
+}
+
+.readme-body h2 {
+  color: #e6edf3;
+  font-size: 1.5em;
+  font-weight: 600;
+  border-bottom: 1px solid #30363d;
+  padding-bottom: 0.3em;
+  margin: 24px 0 16px 0;
+}
+
+.readme-body h3 {
+  color: #e6edf3;
+  font-size: 1.25em;
+  font-weight: 600;
+  margin: 24px 0 16px 0;
+}
+
+.readme-body p {
+  color: #e6edf3;
+  margin: 0 0 16px 0;
+}
+
+.readme-body a {
+  color: #58a6ff;
+  text-decoration: none;
+}
+
+.readme-body a:hover {
+  text-decoration: underline;
+}
+
+.readme-body img {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 6px;
+}
+
+.readme-body ul,
+.readme-body ol {
+  color: #e6edf3;
+  padding-left: 2em;
+  margin: 0 0 16px 0;
+}
+
+.readme-body li {
+  margin: 4px 0;
+}
+
+.readme-body strong {
+  color: #e6edf3;
+  font-weight: 600;
+}
+
+.readme-body em {
+  font-style: italic;
+}
+
+.readme-body hr {
+  border: none;
+  border-top: 1px solid #30363d;
+  margin: 24px 0;
+}
+
+.readme-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.readme-body th,
+.readme-body td {
+  border: 1px solid #30363d;
+  padding: 6px 13px;
+  color: #e6edf3;
+}
+
+.readme-body th {
+  background: #161b22;
+  font-weight: 600;
+}
+
+.readme-body tr:nth-child(2n) {
+  background: #161b22;
+}
+
+.readme-body code {
+  background: #343942;
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+  font-size: 85%;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+}
+
+.readme-body pre {
+  background: #161b22;
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.readme-body blockquote {
+  border-left: 4px solid #3b434b;
+  padding: 0 16px;
+  color: #8b949e;
+  margin: 16px 0;
+}
+
+.readme-body p[align="center"],
+.readme-body h1[align="center"],
+.readme-body h2[align="center"],
+.readme-body h3[align="center"] {
+  text-align: center;
+}
+
+.readme-body p[align="left"] {
+  text-align: left;
+}
+
+.readme-body div[align="center"] {
+  text-align: center;
+}
+
+.readme-body div[align="center"] img {
+  margin: 8px 4px;
+}
+
+.readme-body div {
+  margin: 16px 0;
+}
+
+/* Ensure images in paragraphs display nicely */
+.readme-body p img {
+  margin: 4px 2px;
+}
+
+/* Details/summary for expandable sections */
+.readme-body details {
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin: 16px 0;
+}
+
+.readme-body summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.readme-body details[open] summary {
+  margin-bottom: 16px;
+}
