@@ -18,49 +18,50 @@ const SECTION_PROMPTS: Record<string, string> = {
 Maintain the markdown formatting.
 Return ONLY the updated content.`,
 
-    full: `Generate a complete, professional README.md for this project. Include:
-- Eye-catching title with emojis
-- Clear description
-- Key features (with emojis)
-- Installation instructions
-- Usage examples with code
-- Configuration if applicable
-- Contributing guidelines
-- License section`,
+    full: `Generate a complete, professional README.md for this project.
+CRITICAL: The output must be comprehensive and detail-oriented. Do NOT generate generic placeholders.
+Include:
+- Eye-catching title with centered alignment and a project slogan
+- **About**: A compelling, multi-paragraph introduction explaining the "Why" and "How".
+- **Key Features**: A detailed list of features with emojis.
+- **Architecture**: (Optional) If code structure allows, explain the technical design.
+- **Installation**: Step-by-step commands derived from the package files.
+- **Usage**: Real-world code examples.
+- **Contributing**: Standard open-source guidelines.
+- **License**: The detected license.`,
 
-    description: `Write a compelling project description that:
-- Explains what the project does
-- Highlights unique value propositions
-- Is concise but informative (2-3 paragraphs)
-- Uses professional language`,
+    description: `Write a high-impact, professional introduction for this project.
+- **Hook**: Start with a powerful opening sentence.
+- **Expand**: IGNORE the brevity of the provided description. Use the file contents/tech stack to infer capabilities.
+- **Detail**: Write 2-3 substantial paragraphs explaining the problem this project solves and its unique approach.
+- **Tone**: Exciting, developer-focused, and "Star-worthy".`,
 
-    features: `Generate a list of 5-8 key features for this project. Format as:
-- ✨ **Feature Name** - Brief description
-Use relevant emojis for each feature.`,
+    features: `Generate a list of 6-10 key features for this project.
+- Analyze the file structure to identify actual features (e.g., "Authentication", "API Rate Limiting", "Dark Mode").
+- Format strictly as:
+- ✨ **Feature Name** - Detailed description of what it does and why it matters.
+- Use diverse and relevant emojis.`,
 
-    installation: `Generate clear installation instructions including:
-- Prerequisites
-- Step-by-step installation commands
-- Configuration steps if needed
-Format with proper code blocks.`,
+    installation: `Generate a robust installation guide.
+- Analyze 'package.json', 'requirements.txt', or 'go.mod' to determine exact dependencies.
+- Include prerequisites (Node/Python versions).
+- Provide clear, copy-pasteable bash blocks for installation.
+- Include environment variable setup if config files are detected.`,
 
-    usage: `Generate usage examples including:
-- Quick start code snippet
-- Common use cases with code examples
-- Expected outputs where applicable
-Use appropriate code block formatting.`,
+    usage: `Generate professional usage documentation.
+- Create REALISTIC code examples based on the analyzed code (e.g., if it's a React lib, show a component; if CLI, show commands).
+- Show "Basic Usage" and "Advanced Usage".
+- Include expected output comments in code blocks.`,
 
-    api: `Generate API documentation including:
-- Endpoint descriptions
-- Request/response examples in JSON
-- Parameter descriptions
-Format as markdown tables and code blocks.`,
+    api: `Generate detailed API documentation.
+- Infer endpoints from routes files (e.g., app/api/*).
+- Use Markdown tables for parameters: | Param | Type | Description |
+- Provide JSON request/response examples.`,
 
-    contributing: `Generate professional contributing guidelines including:
-- How to fork and clone
-- Development setup
-- Pull request process
-- Code style guidelines`,
+    contributing: `Generate professional contributing guidelines.
+- detailed steps for forking, cloning, and branching.
+- Mention code style (Prettier/ESLint if detected).
+- Encourage PRs.`,
 };
 
 export async function POST(request: NextRequest) {

@@ -353,11 +353,11 @@ npm run dev`
                 }));
 
                 const featureLines = data.content.split('\n').filter((line: string) =>
-                    line.trim().startsWith('-') || line.trim().startsWith('•')
+                    line.trim().match(/^[-*•]|\d+\./)
                 );
 
-                for (const line of featureLines.slice(0, 6)) {
-                    const match = line.match(/[-•]\s*(.+?)(?:\s*[-–]\s*(.+))?$/);
+                for (const line of featureLines.slice(0, 8)) {
+                    const match = line.match(/^[-*•\d\.]+\s*(.+?)(?:\s*[-–:]\s*(.+))?$/);
                     if (match) {
                         addFeature();
                         // wait a tick for state update
