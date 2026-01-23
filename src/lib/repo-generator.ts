@@ -1,4 +1,4 @@
-import { RepoReadmeData, LICENSE_TEMPLATES } from './repo-types';
+import { RepoReadmeData, LICENSE_TEMPLATES, TECH_COLORS } from './repo-types';
 
 export function generateRepoReadme(data: RepoReadmeData): string {
     const sections: string[] = [];
@@ -110,8 +110,9 @@ export function generateRepoReadme(data: RepoReadmeData): string {
         const techBadges = data.techStack.map(tech => {
             const encodedTech = encodeURIComponent(tech);
             // Use 'for-the-badge' style to match header badges
-            // Using a darker color for tech stack to look professional
-            return `<img src="https://img.shields.io/badge/${encodedTech}-black?style=for-the-badge&logo=${encodedTech}&logoColor=white" alt="${tech}" />`;
+            const colorKey = Object.keys(TECH_COLORS).find(k => k.toLowerCase() === tech.toLowerCase());
+            const color = colorKey ? TECH_COLORS[colorKey] : '2d333b';
+            return `<img src="https://img.shields.io/badge/${encodedTech}-${color}?style=for-the-badge&logo=${encodedTech}&logoColor=white" alt="${tech}" />`;
         }).join(' ');
 
         techSection += `  ${techBadges}\n`;

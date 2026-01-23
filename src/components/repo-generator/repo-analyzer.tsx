@@ -35,6 +35,7 @@ interface RepoAnalysis {
         author: any;
         license: string;
     } | null;
+    fileContents?: Record<string, string>;
     contributors: { login: string; avatar: string; contributions: number }[];
     hasReadme: boolean;
     owner: { login: string; avatar: string };
@@ -322,6 +323,7 @@ npm run dev`
                     techStack: analysis.languages.map(l => l.name),
                     section: 'description',
                     additionalContext: commonContext,
+                    fileContents: analysis.fileContents,
                 }),
             });
             if (descResponse.ok) {
@@ -340,6 +342,7 @@ npm run dev`
                     techStack: analysis.languages.map(l => l.name),
                     section: 'features',
                     additionalContext: commonContext,
+                    fileContents: analysis.fileContents,
                 }),
             });
             if (featuresResponse.ok) {
@@ -384,6 +387,7 @@ npm run dev`
                         techStack: analysis.languages.map(l => l.name),
                         section: 'installation',
                         additionalContext: commonContext,
+                        fileContents: analysis.fileContents,
                     }),
                 });
                 if (installResponse.ok) {
@@ -409,6 +413,7 @@ npm run dev`
                     techStack: analysis.languages.map(l => l.name),
                     section: 'usage',
                     additionalContext: commonContext,
+                    fileContents: analysis.fileContents,
                 }),
             });
             if (usageResponse.ok) {
@@ -427,6 +432,7 @@ npm run dev`
                     techStack: analysis.languages.map(l => l.name),
                     section: 'contributing',
                     additionalContext: commonContext,
+                    fileContents: analysis.fileContents,
                 }),
             });
             if (contribResponse.ok) {

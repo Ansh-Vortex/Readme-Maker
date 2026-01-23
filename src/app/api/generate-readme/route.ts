@@ -10,6 +10,7 @@ interface GenerateRequest {
     additionalContext?: string;
     existingContent?: string;
     instruction?: string;
+    fileContents?: Record<string, string>;
 }
 
 const SECTION_PROMPTS: Record<string, string> = {
@@ -65,7 +66,7 @@ Format as markdown tables and code blocks.`,
 export async function POST(request: NextRequest) {
     try {
         const body: GenerateRequest = await request.json();
-        const { projectName, projectDescription, techStack, section, additionalContext, existingContent, instruction } = body;
+        const { projectName, projectDescription, techStack, section, additionalContext, existingContent, instruction, fileContents } = body;
 
         const apiKey = process.env.ZHIPU_API_KEY;
 
@@ -85,7 +86,8 @@ Your goal is to write content that looks like it belongs in a top-tier open sour
 - Use emojis effectively but professionally.
 - Write actual code examples, not just placeholders.
 - If context is missing, infer reasonable defaults based on the tech stack.
-- Analyze the dependencies to write deep technical descriptions.`;
+- Analyze the provided file contents (package.json, config files, source code) to write deep technical descriptions.
+- Extract installation commands, scripts, and usage patterns directly from the file contents.`;
 
         let userPrompt = '';
         if (section === 'refine' && existingContent && instruction) {
@@ -98,10 +100,21 @@ Instruction: ${instruction}
 
 ${SECTION_PROMPTS.refine}`;
         } else {
-            userPrompt = `Project Name: ${projectName || 'Unnamed Project'}
+            let contextBuilder = `Project Name: ${projectName || 'Unnamed Project'}
 Project Description: ${projectDescription || 'A software project'}
 Tech Stack: ${techStack.length > 0 ? techStack.join(', ') : 'Not specified'}
-${additionalContext ? `Additional Context: ${additionalContext}` : ''}
+${additionalContext ? `Additional Context: ${additionalContext}` : ''}`;
+
+            if (fileContents && Object.keys(fileContents).length > 0) {
+                contextBuilder += `\n\n## Repository File Contents\nUse these files to understand the project structure, dependencies, and usage:\n`;
+                for (const [filename, content] of Object.entries(fileContents)) {
+                    // Truncate large files to avoid token limits
+                    const safeContent = content.slice(0, 15000);
+                    contextBuilder += `\n### ${filename}\n\`\`\`\n${safeContent}\n\`\`\`\n`;
+                }
+            }
+
+            userPrompt = `${contextBuilder}
 
 ${sectionPrompt}
 

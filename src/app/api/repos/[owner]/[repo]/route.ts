@@ -48,12 +48,51 @@ export async function GET(
                 .catch(() => []),
         ]);
 
+        // ... previous standard fetches
+
+        // Fetch additional key files for deep analysis
+        const keyFiles = [
+            'requirements.txt', // Python
+            'pyproject.toml',   // Python
+            'go.mod',          // Go
+            'Cargo.toml',      // Rust
+            'pom.xml',         // Java
+            'composer.json',   // PHP
+            'Gemfile',         // Ruby
+            'Dockerfile',      // Docker
+            'docker-compose.yml', // Docker
+            'Makefile',        // General
+            'tsconfig.json',   // TypeScript
+            'next.config.js',  // Next.js
+            'next.config.ts',  // Next.js
+            'vite.config.ts',  // Vite
+            'vite.config.js',  // Vite
+        ];
+
+        // Try to fetch contents of these files in parallel
+        const filePromises = keyFiles.map(file =>
+            fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${file}`, { headers })
+                .then(r => r.ok ? r.json() : null)
+                .then(data => data && data.content ? { name: file, content: Buffer.from(data.content, 'base64').toString('utf-8') } : null)
+                .catch(() => null)
+        );
+
+        const fetchedFiles = (await Promise.all(filePromises)).filter((f): f is { name: string; content: string } => f !== null);
+
+        // Convert to map for easy access
+        const fileContents = fetchedFiles.reduce((acc, file) => {
+            acc[file.name] = file.content;
+            return acc;
+        }, {} as Record<string, string>);
+
         // Parse package.json if exists
         let packageInfo = null;
         if (packageJsonData && packageJsonData.content) {
             try {
                 const decoded = Buffer.from(packageJsonData.content, 'base64').toString('utf-8');
                 packageInfo = JSON.parse(decoded);
+                // Add package.json to fileContents as well for AI
+                fileContents['package.json'] = decoded;
             } catch (e) {
                 console.error('Failed to parse package.json:', e);
             }
@@ -108,6 +147,9 @@ export async function GET(
             // Languages
             primaryLanguage: repoData.language,
             languages: languagePercentages,
+
+            // Deep Analysis Files
+            fileContents: fileContents,
 
             // Package info (for Node.js)
             packageInfo: packageInfo ? {
