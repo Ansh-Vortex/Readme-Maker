@@ -128,7 +128,7 @@ export const RepoAnalyzer = ({ repo, onComplete, onBack }: RepoAnalyzerProps) =>
 
         // License Badge
         // License Badge - Improved
-        const licenseValue = (analysis.license && analysis.license !== 'NOASSERTION') ? analysis.license : analysis.licenseName;
+        const licenseValue = (analysis.license && analysis.license !== 'NOASSERTION' && analysis.license !== 'Other') ? analysis.license : (analysis.licenseName !== 'Other' ? analysis.licenseName : null);
 
         if (licenseValue) {
             const shortLicense = licenseValue.replace(/ License/i, '').replace(/ License/i, '');
@@ -143,60 +143,14 @@ export const RepoAnalyzer = ({ repo, onComplete, onBack }: RepoAnalyzerProps) =>
             });
         }
 
-        // Language Badges - Generate for all languages
+        // Language Badges - REMOVED (Handled by Tech Stack to avoid duplicates)
+        /*
         const langColors: Record<string, string> = {
-            'TypeScript': '3178C6',
-            'JavaScript': 'F7DF1E',
-            'Python': '3776AB',
-            'Java': 'ED8B00',
-            'Go': '00ADD8',
-            'Rust': '000000',
-            'C++': '00599C',
-            'C': '555555',
-            'C#': '239120',
-            'PHP': '777BB4',
-            'Ruby': 'CC342D',
-            'Swift': 'F05138',
-            'Kotlin': '7F52FF',
-            'Dart': '0175C2',
-            'Lua': '2C2D72',
-            'Shell': '89E051',
-            'HTML': 'E34F26',
-            'CSS': '563D7C',
-            'Vue': '4FC08D',
+             // ... colors
         };
-
         const processedLangs = new Set();
-
-        // Add primary language first
-        if (analysis.primaryLanguage && !processedLangs.has(analysis.primaryLanguage)) {
-            badges.push({
-                id: crypto.randomUUID(),
-                label: analysis.primaryLanguage,
-                message: '',
-                color: langColors[analysis.primaryLanguage] || '333333',
-                style: 'for-the-badge' as const,
-                logoName: analysis.primaryLanguage.toLowerCase().replace(/[^a-z0-9]/g, ''),
-                logoColor: 'white',
-            });
-            processedLangs.add(analysis.primaryLanguage);
-        }
-
-        // Add other languages
-        analysis.languages.forEach(lang => {
-            if (!processedLangs.has(lang.name)) {
-                badges.push({
-                    id: crypto.randomUUID(),
-                    label: lang.name,
-                    message: '',
-                    color: langColors[lang.name] || '333333',
-                    style: 'for-the-badge' as const,
-                    logoName: lang.name.toLowerCase().replace(/[^a-z0-9]/g, ''),
-                    logoColor: 'white',
-                });
-                processedLangs.add(lang.name);
-            }
-        });
+        // ... loop logic
+        */
 
         badges.push({
             id: crypto.randomUUID(),

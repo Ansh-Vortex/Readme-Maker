@@ -51,13 +51,13 @@ export function generateRepoReadme(data: RepoReadmeData): string {
             header += `\n  <p>\n    ${badgeRow}\n  </p>\n`;
         }
 
-        // 5. Website / Links
+        // 5. Website / Links (Strictly below badges)
         const links: string[] = [];
         if (data.projectInfo.websiteUrl) {
-            links.push(`[Website](${data.projectInfo.websiteUrl})`);
+            links.push(`<a href="${data.projectInfo.websiteUrl}"><strong>➥ Website</strong></a>`);
         }
         if (data.projectInfo.demoUrl) {
-            links.push(`[Demo](${data.projectInfo.demoUrl})`);
+            links.push(`<a href="${data.projectInfo.demoUrl}"><strong>➥ Live Demo</strong></a>`);
         }
         if (links.length > 0) {
             header += `  <p>\n    ${links.join(' • ')}\n  </p>\n`;
