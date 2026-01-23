@@ -19,50 +19,47 @@ const SECTION_PROMPTS: Record<string, string> = {
 Maintain the markdown formatting.
 Return ONLY the updated content.`,
 
-    full: `Generate a complete, professional README.md for this project.
-CRITICAL: The output must be comprehensive and detail-oriented. Do NOT generate generic placeholders.
+    full: `Generate a README.md that makes the developer look instantly hireable.
+CRITICAL: Content must be top-tier, authoritative, and showcase deep technical understanding.
 Include:
-- Eye-catching title with centered alignment and a project slogan
-- **About**: A compelling, multi-paragraph introduction explaining the "Why" and "How".
-- **Key Features**: A detailed list of features with emojis.
-- **Architecture**: (Optional) If code structure allows, explain the technical design.
-- **Installation**: Step-by-step commands derived from the package files.
-- **Usage**: Real-world code examples.
-- **Contributing**: Standard open-source guidelines.
+- **Title & Slogan**: Modern, catchy, and professional.
+- **About**: A compelling technical narrative (Why this exists + How it works).
+- **Key Features**: 6-8 distinct, high-value features with technical depth.
+- **Architecture**: (Optional) Explain the system design/data flow.
+- **Installation**: Precise, copy-ready commands.
+- **Usage**: Production-ready code examples (Basic & Advanced).
+- **Contributing**: Professional guidelines encouraging quality contributions.
 - **License**: The detected license.`,
 
-    description: `Write a high-impact, professional introduction for this project.
-- **Hook**: Start with a powerful opening sentence.
-- **Expand**: IGNORE the brevity of the provided description. Use the file contents/tech stack to infer capabilities.
-- **Detail**: Write 2-3 substantial paragraphs explaining the problem this project solves and its unique approach.
-- **Tone**: Exciting, developer-focused, and "Star-worthy".`,
+    description: `Write a "Hire-Worthy" introduction.
+- **Professionalism**: Write as if this is a major open-source product (e.g., Next.js, Stripe).
+- **Hook**: Powerful, problem-solution format.
+- **Content**: 1-2 dense paragraphs. Focus on *value*, *performance*, and *developer experience*.
+- **Tone**: Confident, technically precise, and impressive. No generic fluff.`,
 
-    features: `Generate a list of 6-10 key features for this project.
-- Analyze the file structure to identify actual features (e.g., "Authentication", "API Rate Limiting", "Dark Mode").
-- Format strictly as:
-- ✨ **Feature Name** - Detailed description of what it does and why it matters.
-- Use diverse and relevant emojis.`,
+    features: `Generate a feature list that showcases engineering talent.
+- **Depth**: Don't just list features; explain the *technical implementation* or *value* (e.g., "Zero-config" not just "Easy").
+- **Format**:
+- ✨ **Feature Name** - Technical description.
+- Use 6-8 items. Use diverse, professional emojis.`,
 
-    installation: `Generate a robust installation guide.
-- Analyze 'package.json', 'requirements.txt', or 'go.mod' to determine exact dependencies.
-- Include prerequisites (Node/Python versions).
-- Provide clear, copy-pasteable bash blocks for installation.
-- Include environment variable setup if config files are detected.`,
+    installation: `Generate a production-grade installation guide.
+- Accuracy is paramount. Use the detected package manager.
+- Include 'Prerequisites' and 'Environment Setup' sections.
+- Make it foolproof.`,
 
-    usage: `Generate professional usage documentation.
-- Create REALISTIC code examples based on the analyzed code (e.g., if it's a React lib, show a component; if CLI, show commands).
-- Show "Basic Usage" and "Advanced Usage".
-- Include expected output comments in code blocks.`,
+    usage: `Generate usage examples that show off the code's elegance.
+- **Scenario**: Choose a realistic, impressive use case.
+- **Quality**: The code example must follow best practices and look clean.
+- **Structure**: Show 'Quick Start' and 'Advanced Configuration'.`,
 
-    api: `Generate detailed API documentation.
-- Infer endpoints from routes files (e.g., app/api/*).
-- Use Markdown tables for parameters: | Param | Type | Description |
-- Provide JSON request/response examples.`,
+    api: `Generate API docs that assume a technical audience.
+- Concise, clear, and accurate.
+- Use tables for params.`,
 
-    contributing: `Generate professional contributing guidelines.
-- detailed steps for forking, cloning, and branching.
-- Mention code style (Prettier/ESLint if detected).
-- Encourage PRs.`,
+    contributing: `Generate standard professional contributing guidelines.
+- Brief but encouraging.
+- Mention code quality standards.`,
 };
 
 export async function POST(request: NextRequest) {
@@ -81,15 +78,13 @@ export async function POST(request: NextRequest) {
 
         const sectionPrompt = SECTION_PROMPTS[section] || SECTION_PROMPTS.description;
 
-        const systemPrompt = `You are an elite technical writer creating world-class GitHub README documentation.
-Your goal is to write content that looks like it belongs in a top-tier open source library (like React, Vercel, or Stripe).
-- Be incredibly comprehensive and detailed.
-- Use professional, active voice.
-- Use emojis effectively but professionally.
-- Write actual code examples, not just placeholders.
-- If context is missing, infer reasonable defaults based on the tech stack.
-- Analyze the provided file contents (package.json, config files, source code) to write deep technical descriptions.
-- Extract installation commands, scripts, and usage patterns directly from the file contents.`;
+        const systemPrompt = `You are a Senior Technical Writer & Developer Advocate at a top tech company.
+Your goal: Write README documentation that makes the repository owner look like a world-class engineer.
+- **Tone**: Authoritative, concise, and technically rich.
+- **Quality**: Zero fluff. Every sentence must add value or explain a concept.
+- **Style**: Use formatting (bolding, lists, code blocks) to make it scannable and beautiful.
+- **Inference**: Deeply analyze the file names and structure to infer high-level architecture and design patterns.
+- **Objective**: The result should look like it belongs on the Trending page of GitHub.`;
 
         let userInput = '';
         if (section === 'refine' && existingContent && instruction) {
