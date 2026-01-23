@@ -256,43 +256,67 @@ npm run dev`
             }
         }
 
-        // Generate AI description and features
+        // Generate AI content for all sections
         try {
             const depsInfo = analysis.packageInfo
                 ? 'Dependencies: ' + analysis.packageInfo.dependencies.slice(0, 10).join(', ')
                 : '';
 
-            const additionalContext = [
+            const commonContext = [
                 'This is a ' + (analysis.private ? 'private' : 'public') + ' repository.',
                 'Main language: ' + analysis.primaryLanguage,
                 'Topics: ' + analysis.topics.join(', '),
                 depsInfo
             ].filter(Boolean).join('\n');
 
-            const aiResponse = await fetch('/api/generate-readme', {
+            // 1. Generate Description
+            setProgress(60);
+            const descResponse = await fetch('/api/generate-readme', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     projectName: analysis.name,
                     projectDescription: analysis.description || ('A ' + analysis.primaryLanguage + ' project'),
                     techStack: analysis.languages.map(l => l.name),
-                    section: 'features',
-                    additionalContext: additionalContext,
+                    section: 'description',
+                    additionalContext: commonContext,
                 }),
             });
+            if (descResponse.ok) {
+                const data = await descResponse.json();
+                updateNestedData('projectInfo', 'description', data.content);
+            }
 
-            if (aiResponse.ok) {
-                const aiData = await aiResponse.json();
-                // Parse AI features and add them
-                const featureLines = aiData.content.split('\n').filter((line: string) =>
+            // 2. Generate Features
+            setProgress(70);
+            const featuresResponse = await fetch('/api/generate-readme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: analysis.name,
+                    projectDescription: analysis.description || '',
+                    techStack: analysis.languages.map(l => l.name),
+                    section: 'features',
+                    additionalContext: commonContext,
+                }),
+            });
+            if (featuresResponse.ok) {
+                const data = await featuresResponse.json();
+                // Clear existing first
+                useRepoReadmeStore.setState(state => ({
+                    data: { ...state.data, features: { ...state.data.features, items: [] } }
+                }));
+
+                const featureLines = data.content.split('\n').filter((line: string) =>
                     line.trim().startsWith('-') || line.trim().startsWith('•')
                 );
 
-                for (const line of featureLines.slice(0, 5)) {
+                for (const line of featureLines.slice(0, 6)) {
                     const match = line.match(/[-•]\s*(.+?)(?:\s*[-–]\s*(.+))?$/);
                     if (match) {
                         addFeature();
-                        await new Promise(r => setTimeout(r, 50));
+                        // wait a tick for state update
+                        await new Promise(r => setTimeout(r, 0));
                         const features = useRepoReadmeStore.getState().data.features.items;
                         if (features.length > 0) {
                             const lastFeature = features[features.length - 1];
@@ -305,9 +329,73 @@ npm run dev`
                     }
                 }
             }
+
+            // 3. Generate Installation
+            setProgress(80);
+            if (!analysis.packageInfo) {
+                const installResponse = await fetch('/api/generate-readme', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        projectName: analysis.name,
+                        projectDescription: analysis.description || '',
+                        techStack: analysis.languages.map(l => l.name),
+                        section: 'installation',
+                        additionalContext: commonContext,
+                    }),
+                });
+                if (installResponse.ok) {
+                    const data = await installResponse.json();
+                    updateNestedData('installation', 'enabled', true);
+                    const codeMatch = data.content.match(/```(?:bash|sh|cmd)?\s*([\s\S]*?)```/);
+                    if (codeMatch) {
+                        updateNestedData('installation', 'installCommands', codeMatch[1].trim());
+                    } else {
+                        updateNestedData('installation', 'installCommands', data.content);
+                    }
+                }
+            }
+
+            // 4. Generate Usage
+            setProgress(90);
+            const usageResponse = await fetch('/api/generate-readme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: analysis.name,
+                    projectDescription: analysis.description || '',
+                    techStack: analysis.languages.map(l => l.name),
+                    section: 'usage',
+                    additionalContext: commonContext,
+                }),
+            });
+            if (usageResponse.ok) {
+                const data = await usageResponse.json();
+                updateNestedData('usage', 'enabled', true);
+                updateNestedData('usage', 'usageDescription', data.content);
+            }
+
+            // 5. Generate Contributing
+            const contribResponse = await fetch('/api/generate-readme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: analysis.name,
+                    projectDescription: analysis.description || '',
+                    techStack: analysis.languages.map(l => l.name),
+                    section: 'contributing',
+                    additionalContext: commonContext,
+                }),
+            });
+            if (contribResponse.ok) {
+                const data = await contribResponse.json();
+                updateNestedData('contributing', 'enabled', true);
+                updateNestedData('contributing', 'guidelines', data.content);
+            }
+
         } catch (e) {
             console.error('AI generation failed:', e);
-            // Continue without AI features
+            // Continue with whatever data we have
         }
 
         // Regenerate the markdown
