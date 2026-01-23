@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+// Updated API Endpoint for Z.ai GLM-4.7
+const ZHIPU_API_URL = 'https://api.z.ai/api/coding/paas/v4';
 
 interface GenerateRequest {
     projectName: string;
@@ -90,9 +91,9 @@ Your goal is to write content that looks like it belongs in a top-tier open sour
 - Analyze the provided file contents (package.json, config files, source code) to write deep technical descriptions.
 - Extract installation commands, scripts, and usage patterns directly from the file contents.`;
 
-        let userPrompt = '';
+        let userInput = '';
         if (section === 'refine' && existingContent && instruction) {
-            userPrompt = `Refine the following content:
+            userInput = `Refine the following content:
 \`\`\`markdown
 ${existingContent}
 \`\`\`
@@ -115,12 +116,15 @@ ${additionalContext ? `Additional Context: ${additionalContext}` : ''}`;
                 }
             }
 
-            userPrompt = `${contextBuilder}
+            userInput = `${contextBuilder}
 
 ${sectionPrompt}
 
 Generate the content in markdown format. Be professional, concise, and engaging.`;
         }
+
+        // Combine system prompt and user input for the 'input' field requirement of the new API
+        const combinedInput = `${systemPrompt}\n\n${userInput}`;
 
         const response = await fetch(ZHIPU_API_URL, {
             method: 'POST',
@@ -129,13 +133,8 @@ Generate the content in markdown format. Be professional, concise, and engaging.
                 'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: 'glm-4',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt },
-                ],
-                temperature: 0.7,
-                max_tokens: 2048,
+                model: 'glm-4.7',
+                input: combinedInput,
             }),
         });
 
@@ -149,7 +148,7 @@ Generate the content in markdown format. Be professional, concise, and engaging.
         }
 
         const data = await response.json();
-        const content = data.choices?.[0]?.message?.content || '';
+        const content = data.output_text || '';
 
         return NextResponse.json({ content, section });
 
