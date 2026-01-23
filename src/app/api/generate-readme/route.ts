@@ -78,10 +78,14 @@ export async function POST(request: NextRequest) {
 
         const sectionPrompt = SECTION_PROMPTS[section] || SECTION_PROMPTS.description;
 
-        const systemPrompt = `You are an expert technical writer specializing in creating professional GitHub README files. 
-You write clear, concise, and engaging documentation that follows best practices.
-Always use proper markdown formatting.
-Be specific and practical in your examples.`;
+        const systemPrompt = `You are an elite technical writer creating world-class GitHub README documentation.
+Your goal is to write content that looks like it belongs in a top-tier open source library (like React, Vercel, or Stripe).
+- Be incredibly comprehensive and detailed.
+- Use professional, active voice.
+- Use emojis effectively but professionally.
+- Write actual code examples, not just placeholders.
+- If context is missing, infer reasonable defaults based on the tech stack.
+- Analyze the dependencies to write deep technical descriptions.`;
 
         let userPrompt = '';
         if (section === 'refine' && existingContent && instruction) {

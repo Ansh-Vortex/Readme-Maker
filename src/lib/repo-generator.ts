@@ -108,11 +108,10 @@ export function generateRepoReadme(data: RepoReadmeData): string {
 
         // Map tech stack items to shield badges
         const techBadges = data.techStack.map(tech => {
-            // Simple mapping for color/logo, could be expanded
             const encodedTech = encodeURIComponent(tech);
-            // Dynamic generation using simple colors or default matching
-            // Using a generic style for tech stack items
-            return `<img src="https://img.shields.io/badge/${encodedTech}-black?style=flat-square&logo=${encodedTech}&logoColor=white" alt="${tech}" />`;
+            // Use 'for-the-badge' style to match header badges
+            // Using a darker color for tech stack to look professional
+            return `<img src="https://img.shields.io/badge/${encodedTech}-black?style=for-the-badge&logo=${encodedTech}&logoColor=white" alt="${tech}" />`;
         }).join(' ');
 
         techSection += `  ${techBadges}\n`;
