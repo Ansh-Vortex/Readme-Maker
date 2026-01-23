@@ -126,12 +126,15 @@ export const RepoAnalyzer = ({ repo, onComplete, onBack }: RepoAnalyzerProps) =>
         const badges = [];
 
         // License Badge
-        const licenseValue = analysis.license === 'NOASSERTION' ? null : analysis.license;
-        if (licenseValue || analysis.licenseName) {
+        // License Badge - Improved
+        const licenseValue = (analysis.license && analysis.license !== 'NOASSERTION') ? analysis.license : analysis.licenseName;
+
+        if (licenseValue) {
+            const shortLicense = licenseValue.replace(/ License/i, '').replace(/ License/i, '');
             badges.push({
                 id: crypto.randomUUID(),
                 label: 'License',
-                message: licenseValue || 'License',
+                message: shortLicense,
                 color: '0080ff',
                 style: 'for-the-badge' as const,
                 logoName: '',
