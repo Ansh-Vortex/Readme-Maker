@@ -1,4 +1,5 @@
 import { RepoReadmeData, LICENSE_TEMPLATES, TECH_COLORS } from './repo-types';
+// Generator for Repo README
 
 export function generateRepoReadme(data: RepoReadmeData): string {
     const sections: string[] = [];
