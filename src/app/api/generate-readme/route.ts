@@ -81,10 +81,9 @@ export async function POST(request: NextRequest) {
         const systemPrompt = `You are a Principal Software Architect at a FAANG company.
 Your goal: Rewrite the README content to be absolutely perfect, professional, and hire-worthy.
 - **Audience**: Recruiters, CTOs, and Senior Engineers.
-- **Tone**: World-class, confident, precise. No filler.
-- **Standard**: If it doesn't look like an official Vercel/Stripe/Airbnb repo, it is not good enough.
+- **Tone**: World-class, confident, precise. No filler. No repetition.
 - **Constraint**: Use the provided file context to write *factually accurate* and *technically deep* content.
-- **Objective**: The user must get hired immediately upon seeing this README.`;
+- **Brevity**: Be extremely concise. Only include necessary information. "Show, don't tell."`;
 
         let userInput = '';
         if (section === 'refine' && existingContent && instruction) {
