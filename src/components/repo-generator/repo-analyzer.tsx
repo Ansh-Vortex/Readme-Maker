@@ -306,11 +306,69 @@ npm run dev`
                 : '';
 
             const commonContext = [
+                `Project Name: ${analysis.name}`,
+                `Repository URL: https://github.com/${repoOwner}/${repoName}`,
+                `Clone Command: git clone https://github.com/${repoOwner}/${repoName}.git`,
                 'This is a ' + (analysis.private ? 'private' : 'public') + ' repository.',
                 'Main language: ' + analysis.primaryLanguage,
                 'Topics: ' + analysis.topics.join(', '),
                 depsInfo
             ].filter(Boolean).join('\n');
+
+            // Parallelize requests...
+            // ... (rest of parallel calls remains same, just ensuring context is used)
+
+            // Fix Feature Regex in processing
+            if (featuresDetails.status === 'fulfilled') {
+                const data = featuresDetails.value;
+                // Clear existing first
+                useRepoReadmeStore.setState(state => ({
+                    data: { ...state.data, features: { ...state.data.features, items: [] } }
+                }));
+
+                // More robust regex to catch "Feature Name: Description" or "Feature Name - Description"
+                // or just bolded items.
+                const featureLines = data.content.split('\n').filter((line: string) =>
+                    line.trim().length > 5 && (line.match(/^[-*•]|\d+\./) || line.includes('**'))
+                );
+
+                for (const line of featureLines.slice(0, 8)) {
+                    // Match: (bullet/number) (Title) (separator) (Description)
+                    // Group 1: Title (inside ** if present, or just text)
+                    // Group 2: Description
+                    const match = line.match(/^(?:[-*•\d\.]+\s*)?(?:\*\*)?(.+?)(?:\*\*)?(?:\s*[-–:]\s*)(.+)$/);
+
+                    if (match) {
+                        addFeature();
+                        await new Promise(r => setTimeout(r, 0));
+                        const features = useRepoReadmeStore.getState().data.features.items;
+                        if (features.length > 0) {
+                            const lastFeature = features[features.length - 1];
+                            updateFeature(lastFeature.id, {
+                                emoji: '✨',
+                                title: match[1]?.trim() || 'Feature',
+                                description: match[2]?.trim() || '',
+                            });
+                        }
+                    } else if (line.includes('**')) {
+                        // Fallback for lines that are just "**Title** Description" without separator
+                        const simpleMatch = line.match(/\*\*(.+?)\*\*\s*(.*)/);
+                        if (simpleMatch) {
+                            addFeature();
+                            await new Promise(r => setTimeout(r, 0));
+                            const features = useRepoReadmeStore.getState().data.features.items;
+                            if (features.length > 0) {
+                                const lastFeature = features[features.length - 1];
+                                updateFeature(lastFeature.id, {
+                                    emoji: '✨',
+                                    title: simpleMatch[1]?.trim(),
+                                    description: simpleMatch[2]?.trim() || 'High-performance feature.',
+                                });
+                            }
+                        }
+                    }
+                }
+            }
 
             // Parallelize requests for speed
             const [descDetails, featuresDetails, installDetails, usageDetails, contribDetails] = await Promise.allSettled([
