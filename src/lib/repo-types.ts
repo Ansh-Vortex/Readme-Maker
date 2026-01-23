@@ -16,6 +16,7 @@ export interface Screenshot {
     url: string;
     caption: string;
     type: 'image' | 'gif' | 'video';
+    _preview?: string; // Local preview URL (not saved)
 }
 
 export interface CodeExample {
