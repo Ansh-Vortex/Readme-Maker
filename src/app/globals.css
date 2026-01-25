@@ -502,3 +502,107 @@
 .readme-body details[open] summary {
   margin-bottom: 16px;
 }
+
+/* Smooth transitions for instant live preview */
+.readme-body>* {
+  transition: opacity 0.15s ease-out;
+}
+
+/* Enhanced inline code styling */
+.readme-body .inline-code,
+.readme-body code:not(.code-block) {
+  background: #343942;
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+  font-size: 85%;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  color: #e6edf3;
+}
+
+/* Code block container */
+.readme-body .code-pre,
+.readme-body pre {
+  background: #161b22;
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 16px 0;
+  border: 1px solid #30363d;
+}
+
+.readme-body .code-block {
+  display: block;
+  background: transparent;
+  padding: 0;
+  font-size: 87.5%;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  color: #e6edf3;
+  white-space: pre;
+  line-height: 1.45;
+}
+
+/* Syntax highlighting - GitHub Dark Theme */
+/* Keywords: if, else, return, function, const, let, var, import, export, from, class */
+.readme-body .code-block.language-javascript,
+.readme-body .code-block.language-js,
+.readme-body .code-block.language-typescript,
+.readme-body .code-block.language-ts,
+.readme-body .code-block.language-jsx,
+.readme-body .code-block.language-tsx {
+  color: #c9d1d9;
+}
+
+/* Python specific */
+.readme-body .code-block.language-python,
+.readme-body .code-block.language-py {
+  color: #c9d1d9;
+}
+
+/* Bash/Shell specific */
+.readme-body .code-block.language-bash,
+.readme-body .code-block.language-sh,
+.readme-body .code-block.language-shell,
+.readme-body .code-block.language-zsh {
+  color: #a5d6ff;
+}
+
+/* JSON specific */
+.readme-body .code-block.language-json {
+  color: #7ee787;
+}
+
+/* CSS specific */
+.readme-body .code-block.language-css,
+.readme-body .code-block.language-scss,
+.readme-body .code-block.language-sass {
+  color: #d2a8ff;
+}
+
+/* HTML/XML specific */
+.readme-body .code-block.language-html,
+.readme-body .code-block.language-xml {
+  color: #ff7b72;
+}
+
+/* YAML/Markdown specific */
+.readme-body .code-block.language-yaml,
+.readme-body .code-block.language-yml,
+.readme-body .code-block.language-markdown,
+.readme-body .code-block.language-md {
+  color: #79c0ff;
+}
+
+/* Live preview smooth content update animation */
+@keyframes preview-fade-in {
+  from {
+    opacity: 0.8;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.readme-body {
+  animation: preview-fade-in 0.1s ease-out;
+}

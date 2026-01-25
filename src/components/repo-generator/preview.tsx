@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -37,7 +37,8 @@ export const RepoPreview = () => {
 
     const hasProjectName = data.projectInfo.name && data.projectInfo.name.length > 0;
 
-    const customComponents = {
+    // Memoized custom components for optimized rendering
+    const customComponents = useMemo(() => ({
         img: ({ src, alt, ...props }: any) => (
             <img
                 src={src}
@@ -77,7 +78,31 @@ export const RepoPreview = () => {
                 {children}
             </div>
         ),
-    };
+        // Enhanced code blocks with syntax highlighting
+        code: ({ node, inline, className, children, ...props }: any) => {
+            const match = /language-(\w+)/.exec(className || '');
+            const language = match ? match[1] : '';
+
+            if (inline) {
+                return (
+                    <code className="inline-code" {...props}>
+                        {children}
+                    </code>
+                );
+            }
+
+            return (
+                <code className={`code-block language-${language}`} {...props}>
+                    {children}
+                </code>
+            );
+        },
+        pre: ({ children, ...props }: any) => (
+            <pre className="code-pre" {...props}>
+                {children}
+            </pre>
+        ),
+    }), []);
 
     return (
         <motion.div

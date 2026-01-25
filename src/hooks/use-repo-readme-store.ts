@@ -128,17 +128,12 @@ const initialData: RepoReadmeData = {
     },
 };
 
-// Debounce utility
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-const DEBOUNCE_DELAY = 50;
-
-const debouncedGenerateMarkdown = (newData: RepoReadmeData, set: any) => {
-    if (debounceTimer) {
-        clearTimeout(debounceTimer);
-    }
-    debounceTimer = setTimeout(() => {
+// Instant markdown generation - no debounce for true live preview
+const generateMarkdownInstant = (newData: RepoReadmeData, set: any) => {
+    // Use requestAnimationFrame for smooth UI updates
+    requestAnimationFrame(() => {
         set({ markdown: generateRepoReadme(newData) });
-    }, DEBOUNCE_DELAY);
+    });
 };
 
 export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
@@ -149,7 +144,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
     updateData: (section, value) =>
         set((state) => {
             const newData = { ...state.data, [section]: value };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -160,7 +155,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                 ...state.data,
                 [section]: { ...sectionData, [subsection]: value }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -174,7 +169,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     badges: [...state.data.projectInfo.badges, badge]
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -187,7 +182,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     badges: state.data.projectInfo.badges.filter(b => b.id !== id)
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -202,7 +197,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     )
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -222,7 +217,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     items: [...state.data.features.items, newFeature]
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -235,7 +230,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     items: state.data.features.items.filter(f => f.id !== id)
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -250,7 +245,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     )
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -271,7 +266,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     examples: [...state.data.usage.examples, newExample]
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -284,7 +279,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     examples: state.data.usage.examples.filter(e => e.id !== id)
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -299,7 +294,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     )
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -321,7 +316,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     endpoints: [...state.data.apiDocs.endpoints, newEndpoint]
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -334,7 +329,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     endpoints: state.data.apiDocs.endpoints.filter(e => e.id !== id)
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -349,7 +344,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     )
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -371,7 +366,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     [type]: [...state.data.configuration[type], newOption]
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -384,7 +379,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     [type]: state.data.configuration[type].filter((o: ConfigOption) => o.id !== id)
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -399,7 +394,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     )
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -420,7 +415,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     items: [...state.data.screenshots.items, newScreenshot]
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -433,7 +428,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     items: state.data.screenshots.items.filter(s => s.id !== id)
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -448,7 +443,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     )
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -467,7 +462,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     roadmap: [...state.data.extras.roadmap, newItem]
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -480,7 +475,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     roadmap: state.data.extras.roadmap.filter(r => r.id !== id)
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -495,7 +490,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     )
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -514,7 +509,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     faq: [...state.data.extras.faq, newFaq]
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -527,7 +522,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     faq: state.data.extras.faq.filter(f => f.id !== id)
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -542,7 +537,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     )
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -554,7 +549,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                 ...state.data,
                 techStack: [...state.data.techStack, tech]
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -564,7 +559,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                 ...state.data,
                 techStack: state.data.techStack.filter(t => t !== tech)
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -579,7 +574,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     prerequisites: [...state.data.installation.prerequisites, prereq]
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -592,7 +587,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
                     prerequisites: state.data.installation.prerequisites.filter(p => p !== prereq)
                 }
             };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
@@ -602,7 +597,7 @@ export const useRepoReadmeStore = create<RepoReadmeState>((set, get) => ({
     applyAIContent: (section, content) =>
         set((state) => {
             const newData = { ...state.data, [section]: content };
-            debouncedGenerateMarkdown(newData, set);
+            generateMarkdownInstant(newData, set);
             return { data: newData };
         }),
 
