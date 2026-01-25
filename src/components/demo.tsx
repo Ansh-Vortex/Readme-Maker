@@ -265,72 +265,60 @@ export function SplineSceneBasic() {
                                     <p className="text-[#8b949e] text-xs mt-1">Copy or download instantly</p>
                                 </div>
                             </motion.div>
-
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.7 }}
-                                className="mt-8"
-                            >
-                                <a href="https://buymeachai.ezee.li/anshvortex" target="_blank" rel="noopener noreferrer">
-                                    <img src="https://buymeachai.ezee.li/assets/images/buymeachai-button.png" alt="Buy Me A Chai" width="140" className="opacity-80 hover:opacity-100 transition-opacity" />
-                                </a>
-                            </motion.div>
+                    </motion.div>
                         </div>
 
-                        {/* Clean Professional Footer */}
-                        <footer className="bg-[#010409] border-t border-[#21262d] py-4">
-                            <div className="max-w-6xl mx-auto px-6">
-                                <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-                                    <div className="flex items-center gap-6 text-xs text-[#8b949e]">
-                                        <span>© 2025 README.md Maker</span>
-                                        <a href="https://github.com/Ansh-Vortex/Readme-Maker" target="_blank" className="hover:text-white transition-colors">GitHub</a>
-                                        <a href="https://github.com/Ansh-Vortex/Readme-Maker/issues" target="_blank" className="hover:text-white transition-colors">Issues</a>
-                                    </div>
+                        {/* Footer - Perfect corner alignment */ }
+    <footer className="bg-[#010409] border-t border-[#21262d] px-6 py-3">
+        <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-6 text-xs text-[#8b949e]">
+                <span>© 2025 README.md Maker</span>
+                <a href="https://github.com/Ansh-Vortex/Readme-Maker" target="_blank" className="hover:text-white transition-colors">GitHub</a>
+                <a href="https://github.com/Ansh-Vortex/Readme-Maker/issues" target="_blank" className="hover:text-white transition-colors">Issues</a>
+            </div>
 
-                                    <div className="flex items-center gap-4 text-xs text-[#8b949e]">
-                                        <div className="flex items-center gap-3">
-                                            <a href="https://github.com/Ansh-Vortex" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                                                <Github className="w-4 h-4" />
-                                            </a>
-                                            <a href="https://instagram.com/anshvortex" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                                                <Instagram className="w-4 h-4" />
-                                            </a>
-                                            <a href="https://t.me/highoncodes" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                                                <Send className="w-4 h-4" />
-                                            </a>
-                                        </div>
-                                        <span className="text-[#30363d]">|</span>
-                                        <span>by <a href="https://github.com/Ansh-Vortex" target="_blank" className="text-white hover:text-[#58a6ff] transition-colors">Ansh</a></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </footer>
-                    </motion.div>
+            <div className="flex items-center gap-4 text-xs text-[#8b949e]">
+                <div className="flex items-center gap-3">
+                    <a href="https://github.com/Ansh-Vortex" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                        <Github className="w-4 h-4" />
+                    </a>
+                    <a href="https://instagram.com/anshvortex" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                        <Instagram className="w-4 h-4" />
+                    </a>
+                    <a href="https://t.me/highoncodes" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                        <Send className="w-4 h-4" />
+                    </a>
+                </div>
+                <span className="text-[#30363d]">|</span>
+                <span>by <a href="https://github.com/Ansh-Vortex" target="_blank" className="text-white hover:text-[#58a6ff] transition-colors">Ansh</a></span>
+            </div>
+        </div>
+    </footer>
+                    </motion.div >
                 ) : showGenerator === 'profile' ? (
-                    <motion.div
-                        key="profile-generator"
-                        initial={{ opacity: 0, scale: 1.02 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute inset-0 z-30"
-                    >
-                        <Generator onBack={() => setShowGenerator('none')} />
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="repo-generator"
-                        initial={{ opacity: 0, scale: 1.02 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute inset-0 z-30"
-                    >
-                        <RepoGenerator onBack={() => setShowGenerator('none')} />
-                    </motion.div>
-                )
-                }
+        <motion.div
+            key="profile-generator"
+            initial={{ opacity: 0, scale: 1.02 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 z-30"
+        >
+            <Generator onBack={() => setShowGenerator('none')} />
+        </motion.div>
+    ) : (
+        <motion.div
+            key="repo-generator"
+            initial={{ opacity: 0, scale: 1.02 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 z-30"
+        >
+            <RepoGenerator onBack={() => setShowGenerator('none')} />
+        </motion.div>
+    )
+}
             </AnimatePresence >
         </div >
     )
