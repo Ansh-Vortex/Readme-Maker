@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { motion } from 'framer-motion';
 import {
     Loader2, Sparkles, Check, ArrowRight,
@@ -48,10 +49,11 @@ interface RepoAnalyzerProps {
 }
 
 export const RepoAnalyzer = ({ repo, onComplete, onBack }: RepoAnalyzerProps) => {
-    const [step, setStep] = useState<'analyzing' | 'generating' | 'complete' | 'error'>('analyzing');
+    const [step, setStep] = useState<'prompt' | 'analyzing' | 'generating' | 'complete' | 'error'>('prompt');
     const [analysis, setAnalysis] = useState<RepoAnalysis | null>(null);
     const [error, setError] = useState('');
     const [progress, setProgress] = useState(0);
+    const [userPrompt, setUserPrompt] = useState('');
 
     const {
         updateNestedData,
@@ -71,9 +73,10 @@ export const RepoAnalyzer = ({ repo, onComplete, onBack }: RepoAnalyzerProps) =>
 
     const [currentStep, setCurrentStep] = useState(0);
 
-    useEffect(() => {
+    const startAnalysis = () => {
+        setStep('analyzing');
         analyzeRepo();
-    }, []);
+    };
 
     const analyzeRepo = async () => {
         try {
@@ -266,7 +269,8 @@ npm run dev`
                 'This is a ' + (analysis.private ? 'private' : 'public') + ' repository.',
                 'Main language: ' + analysis.primaryLanguage,
                 'Topics: ' + analysis.topics.join(', '),
-                depsInfo
+                depsInfo,
+                userPrompt ? `\n**USER INSTRUCTIONS (PRIORITIZE THIS)**: ${userPrompt}` : ''
             ].filter(Boolean).join('\n');
 
             // Parallelize requests for speed
@@ -496,6 +500,75 @@ npm run dev`
                             Customize README
                             <ArrowRight className="w-4 h-4" />
                         </Button>
+                    </motion.div>
+                ) : step === 'prompt' ? (
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="space-y-6"
+                    >
+                        <div className="text-center">
+                            <div className="w-16 h-16 mx-auto rounded-full bg-[#a371f7]/20 flex items-center justify-center mb-4">
+                                <Sparkles className="w-8 h-8 text-[#a371f7]" />
+                            </div>
+                            <h2 className="text-xl font-semibold text-white mb-2">Customize Your README</h2>
+                            <p className="text-[#8b949e]">
+                                Tell the AI what kind of README you want for <strong className="text-white">{repo.name}</strong>
+                            </p>
+                        </div>
+
+                        {/* Preset Suggestions */}
+                        <div className="space-y-2">
+                            <label className="text-xs text-[#8b949e]">Quick presets:</label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { label: '✨ Professional & Clean', value: 'Make it professional, clean, and minimal. Focus on clarity.' },
+                                    { label: '🎨 Beautiful & Stunning', value: 'Make it visually stunning with beautiful badges, emojis, and modern styling.' },
+                                    { label: '📚 Detailed & Complete', value: 'Include all sections: features, installation, usage examples, API docs, contributing guidelines.' },
+                                    { label: '🚀 Startup-style', value: 'Make it punchy like a startup landing page - catchy tagline, key features, quick start.' },
+                                ].map((preset) => (
+                                    <button
+                                        key={preset.label}
+                                        onClick={() => setUserPrompt(preset.value)}
+                                        className={`px-3 py-1.5 text-xs rounded-lg transition-all ${userPrompt === preset.value
+                                            ? 'bg-[#a371f7] text-white'
+                                            : 'bg-[#21262d] text-[#8b949e] hover:text-white border border-[#30363d] hover:border-[#a371f7]'
+                                            }`}
+                                    >
+                                        {preset.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Custom Prompt Input */}
+                        <div className="space-y-2">
+                            <label className="text-xs text-[#8b949e]">Or describe what you want:</label>
+                            <Textarea
+                                value={userPrompt}
+                                onChange={(e) => setUserPrompt(e.target.value)}
+                                placeholder="e.g., Make it look professional with a focus on the API documentation. Include code examples for Python and JavaScript..."
+                                className="min-h-[100px] bg-[#0d1117] border-[#30363d] text-white placeholder:text-[#484f58] resize-none"
+                            />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3">
+                            <Button onClick={onBack} variant="ghost" className="text-[#8b949e] hover:text-white">
+                                ← Back
+                            </Button>
+                            <Button
+                                onClick={startAnalysis}
+                                className="flex-1 bg-gradient-to-r from-[#a371f7] to-[#8957e5] hover:from-[#8957e5] hover:to-[#7c3aed] text-white gap-2"
+                            >
+                                <Wand2 className="w-4 h-4" />
+                                Generate README
+                            </Button>
+                        </div>
+
+                        <p className="text-xs text-center text-[#484f58]">
+                            💡 Leave empty to use smart defaults based on your repository
+                        </p>
                     </motion.div>
                 ) : (
                     <div className="space-y-6">

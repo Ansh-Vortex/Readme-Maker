@@ -19,47 +19,83 @@ const SECTION_PROMPTS: Record<string, string> = {
 Maintain the markdown formatting.
 Return ONLY the updated content.`,
 
-    full: `Generate a README.md that makes the developer look instantly hireable.
-CRITICAL: Content must be top-tier, authoritative, and showcase deep technical understanding.
-Include:
-- **Title & Slogan**: Modern, catchy, and professional.
-- **About**: A compelling technical narrative (Why this exists + How it works).
-- **Key Features**: 6-8 distinct, high-value features with technical depth.
-- **Architecture**: (Optional) Explain the system design/data flow.
-- **Installation**: Precise, copy-ready commands.
-- **Usage**: Production-ready code examples (Basic & Advanced).
-- **Contributing**: Professional guidelines encouraging quality contributions.
-- **License**: The detected license.`,
+    full: `Generate a STUNNING, visually impressive README.md that makes this project irresistible.
+CRITICAL REQUIREMENTS:
+- **Header**: Create an eye-catching centered header with logo placeholder, badges, and a powerful one-liner tagline
+- **Professional Badges**: Include License, Version, Build Status, Stars using shields.io format
+- **Tech Stack Badges**: Display all technologies with beautiful colored badges
+- **About/Description**: Compelling 2-3 sentence hook that sells the project's value
+- **✨ Key Features**: 6-8 features with emojis, bold titles, and clear value propositions
+- **🖼 Screenshots/Demo**: Include placeholder section for visuals (image tags with "your-screenshot.png")
+- **📦 Installation**: Multiple package manager options (npm, yarn, pnpm) with copy-ready code blocks
+- **🚀 Quick Start**: Minimal working example that a developer can run in under 2 minutes
+- **📖 Usage Examples**: 2-3 real-world usage scenarios with clean, commented code
+- **⚙️ Configuration**: Environment variables and config options in a clean table format
+- **🤝 Contributing**: Welcoming guidelines with steps for PR submission
+- **📄 License**: Clear license statement with year and holder
+- **👨‍💻 Author**: Section with social links (GitHub, Twitter badges)
 
-    description: `Write a "Hire-Worthy" introduction.
-- **Format**:
-Tagline: [One powerful, high-performance sentence]
-Description: [1 strict paragraph (max 3-4 sentences). Focus on "What" and "Why"]
-- **Tone**: Professional, high-performance, and impressive.`,
+STYLE: Modern, clean, GitHub-flavored markdown. Use horizontal rules (---) to separate major sections.
+Use <div align="center"> for centered content. Make it VISUALLY STUNNING.`,
 
-    features: `Generate a feature list that showcases engineering talent.
-- **Depth**: Don't just list features; explain the *technical implementation* or *value* (e.g., "Zero-config" not just "Easy").
-- **Format**:
-- ✨ **Feature Name** - Technical description.
-- Use 6-8 items. Use diverse, professional emojis.`,
+    description: `Write a POWERFUL project introduction that captures attention immediately.
+FORMAT (strict):
+Tagline: [One impactful sentence - like a startup pitch, max 15 words]
+Description: [2-3 sentences that answer: What is it? Who is it for? Why is it special?]
 
-    installation: `Generate a production-grade installation guide.
-- Accuracy is paramount. Use the detected package manager.
-- Include 'Prerequisites' and 'Environment Setup' sections.
-- Make it foolproof.`,
+TONE: Confident, professional, inspiring. Avoid generic phrases like "easy to use" or "powerful".
+Be specific about the unique value proposition.`,
 
-    usage: `Generate usage examples that show off the code's elegance.
-- **Scenario**: Choose a realistic, impressive use case.
-- **Quality**: The code example must follow best practices and look clean.
-- **Structure**: Show 'Quick Start' and 'Advanced Configuration'.`,
+    features: `Generate a STUNNING feature list that showcases the project's brilliance.
+REQUIREMENTS:
+- Use diverse, relevant emojis (⚡ 🔒 🎨 🚀 💡 📦 🔧 🌐 📊 🛡️)
+- Each feature must have a BOLD title and a clear technical description
+- Focus on developer benefits and technical capabilities
+- Include 6-8 features
 
-    api: `Generate API docs that assume a technical audience.
-- Concise, clear, and accurate.
-- Use tables for params.`,
+FORMAT (strict line structure):
+- ⚡ **Feature Title** - Clear description of what it does and why it matters
+- 🔒 **Another Feature** - Technical benefit with specific details
 
-    contributing: `Generate standard professional contributing guidelines.
-- Brief but encouraging.
-- Mention code quality standards.`,
+Make features sound impressive but accurate.`,
+
+    installation: `Generate a COMPREHENSIVE, foolproof installation guide.
+REQUIREMENTS:
+- Prerequisites section with version requirements
+- Multiple package managers (npm, yarn, pnpm, bun)
+- Clone from source option with git commands
+- Environment setup (.env.example values)
+- Verification step ("Run npm test to verify installation")
+
+Use proper markdown code blocks with language hints (bash, shell).
+Make it IMPOSSIBLE to fail installation by following these steps.`,
+
+    usage: `Generate IMPRESSIVE usage examples that showcase the code's elegance.
+REQUIREMENTS:
+- Quick Start (5 lines or less to get something working)
+- Basic Example with comments explaining each line
+- Advanced Example showing powerful configuration options
+- Expected Output section
+
+Use realistic, production-quality code. Add helpful inline comments.
+Code should follow best practices and look professional.`,
+
+    api: `Generate clean, professional API documentation.
+REQUIREMENTS:
+- Use a markdown table for endpoints/methods
+- Include parameters, types, defaults, and descriptions
+- Add request/response examples in code blocks
+- Keep it scannable and developer-friendly`,
+
+    contributing: `Generate welcoming, professional contributing guidelines.
+INCLUDE:
+- How to report bugs (issue template mention)
+- How to suggest features
+- Pull Request process (fork, branch, PR)
+- Code style expectations
+- A warm "thank you" to contributors
+
+TONE: Encouraging, professional, community-focused.`,
 };
 
 export async function POST(request: NextRequest) {
