@@ -229,6 +229,27 @@ export function SplineSceneBasic() {
                                 </div>
                             </motion.div>
 
+                            {/* Features Section */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.6 }}
+                                className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl"
+                            >
+                                {[
+                                    { icon: '⚡', title: 'Instant Preview', desc: 'See changes in real-time' },
+                                    { icon: '🤖', title: 'AI Powered', desc: 'Smart content generation' },
+                                    { icon: '🎨', title: 'Beautiful Design', desc: 'Professional templates' },
+                                    { icon: '📦', title: 'Export Ready', desc: 'Copy or download instantly' },
+                                ].map((feature, i) => (
+                                    <div key={i} className="p-4 rounded-lg bg-[#161b22]/50 border border-[#30363d] text-center hover:border-[#58a6ff] transition-colors">
+                                        <div className="text-2xl mb-2">{feature.icon}</div>
+                                        <h4 className="text-white font-medium text-sm">{feature.title}</h4>
+                                        <p className="text-[#8b949e] text-xs mt-1">{feature.desc}</p>
+                                    </div>
+                                ))}
+                            </motion.div>
+
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -241,25 +262,52 @@ export function SplineSceneBasic() {
                             </motion.div>
                         </div>
 
-                        {/* Footer */}
-                        <footer className="px-6 py-3 bg-[#010409] border-t border-[#21262d] flex items-center justify-between text-sm">
-                            <div className="flex items-center gap-6 text-[#8b949e]">
-                                <span>Made by <strong className="text-white">Ansh</strong></span>
-                                <div className="flex items-center gap-3">
-                                    <a href="https://instagram.com/anshvortex" target="_blank" rel="noopener noreferrer" className="hover:text-[#E4405F] transition-colors">
-                                        <Instagram className="w-4 h-4" />
-                                    </a>
-                                    <a href="https://t.me/highoncodes" target="_blank" rel="noopener noreferrer" className="hover:text-[#2CA5E0] transition-colors">
-                                        <Send className="w-4 h-4" />
-                                    </a>
-                                    <a href="https://github.com/Ansh-Vortex" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                                        <Github className="w-4 h-4" />
-                                    </a>
-                                </div>
-                            </div>
+                        {/* Enhanced Footer */}
+                        <footer className="bg-[#010409] border-t border-[#21262d]">
+                            <div className="max-w-6xl mx-auto px-6 py-6">
+                                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                    {/* Left - Logo & Links */}
+                                    <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+                                        <div className="flex items-center gap-2">
+                                            <img src="/favicon.png" alt="Logo" className="w-6 h-6 opacity-70" />
+                                            <span className="text-[#8b949e] text-sm">README.md Maker</span>
+                                        </div>
+                                        <nav className="flex items-center gap-4 text-xs text-[#8b949e]">
+                                            <a href="#" className="hover:text-[#58a6ff] transition-colors">Features</a>
+                                            <a href="https://github.com/Ansh-Vortex/Readme-Maker" target="_blank" className="hover:text-[#58a6ff] transition-colors">GitHub</a>
+                                            <a href="https://github.com/Ansh-Vortex/Readme-Maker/issues" target="_blank" className="hover:text-[#58a6ff] transition-colors">Report Bug</a>
+                                            <a href="https://buymeachai.ezee.li/anshvortex" target="_blank" className="hover:text-[#58a6ff] transition-colors">Donate</a>
+                                        </nav>
+                                    </div>
 
-                            <div className="flex items-center gap-4 text-[#484f58]">
-                                <span className="font-mono text-xs">v2.0.0</span>
+                                    {/* Center - Social Links */}
+                                    <div className="flex items-center gap-4">
+                                        <a href="https://instagram.com/anshvortex" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#21262d] hover:bg-[#30363d] text-[#8b949e] hover:text-[#E4405F] transition-all">
+                                            <Instagram className="w-4 h-4" />
+                                        </a>
+                                        <a href="https://t.me/highoncodes" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#21262d] hover:bg-[#30363d] text-[#8b949e] hover:text-[#2CA5E0] transition-all">
+                                            <Send className="w-4 h-4" />
+                                        </a>
+                                        <a href="https://github.com/Ansh-Vortex" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#21262d] hover:bg-[#30363d] text-[#8b949e] hover:text-white transition-all">
+                                            <Github className="w-4 h-4" />
+                                        </a>
+                                    </div>
+
+                                    {/* Right - Version & Made by */}
+                                    <div className="flex items-center gap-4 text-xs">
+                                        <span className="px-2 py-1 rounded bg-[#21262d] text-[#8b949e] font-mono">v2.0.0</span>
+                                        <span className="text-[#8b949e]">
+                                            Made with <span className="text-red-500">♥</span> by <a href="https://github.com/Ansh-Vortex" target="_blank" className="text-white hover:text-[#58a6ff] transition-colors font-medium">Ansh</a>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Copyright */}
+                                <div className="mt-4 pt-4 border-t border-[#21262d] text-center">
+                                    <p className="text-[#484f58] text-xs">
+                                        © 2025 README.md Maker. Open source under MIT License.
+                                    </p>
+                                </div>
                             </div>
                         </footer>
                     </motion.div>
